@@ -220,7 +220,9 @@ class LitigationStrategyOptimizer:
                 risk_factors=self._identify_risk_factors(case_data, analyses),
                 mitigation_strategies=self._develop_mitigation_strategies(case_data, analyses),
                 ai_strategic_summary=ai_summary,
-                alternative_strategies=self._generate_alternative_strategies(case_data, analyses)
+                alternative_strategies=self._generate_alternative_strategies(case_data, analyses),
+                calculation_breakdown=cost_analysis.get('calculation_breakdown'),
+                calculation_transparency=cost_analysis.get('calculation_transparency')
             )
             
             # Cache strategy for future reference
