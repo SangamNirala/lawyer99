@@ -122,6 +122,10 @@ class LitigationStrategy:
     # AI insights
     ai_strategic_summary: str = ""
     alternative_strategies: List[Dict[str, Any]] = field(default_factory=list)
+    
+    # New transparency fields
+    calculation_breakdown: Optional[Dict[str, Any]] = None
+    calculation_transparency: Optional[Dict[str, Any]] = None
 
 class LitigationStrategyOptimizer:
     """Enhanced strategy optimization engine with professional legal analysis"""
