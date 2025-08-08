@@ -1025,66 +1025,136 @@ class LitigationStrategyOptimizer:
         )
 
     def _calculate_cost_benefit_analysis(self, case_data: Dict[str, Any], analyses: Dict[str, Any]) -> Dict[str, Any]:
-        """Calculate comprehensive cost-benefit analysis with realistic estimates"""
+        """
+        Calculate comprehensive cost-benefit analysis with transparent formulas and realistic estimates.
+        
+        TRANSPARENT CALCULATION METHODOLOGY:
+        1. Litigation Costs = Base Cost × Jurisdiction × Complexity × Case Value × Evidence Multipliers
+        2. Expected Value = (Settlement Path Value + Trial Path Value) - Litigation Costs
+        3. All multipliers are documented with clear rationale and bounds checking
+        """
         case_value = float(case_data.get('case_value', 100000)) if case_data.get('case_value') else 100000
         jurisdiction = case_data.get('jurisdiction', 'federal')
         case_complexity = float(case_data.get('case_complexity', 0.5))
         evidence_strength = float(case_data.get('evidence_strength', 5)) / 10.0
         
-        # Base litigation cost calculation with realistic factors
-        base_cost = 45000  # Base litigation cost updated for 2024
+        # === TRANSPARENT LITIGATION COST CALCULATION ===
         
-        # Jurisdiction cost multiplier
-        jurisdiction_multiplier = self.cost_multipliers.get(jurisdiction, 1.0)
+        # Base litigation cost (2024 market rates)
+        base_cost = 45000  
+        logger.info(f"💰 Base Litigation Cost: ${base_cost:,} (2024 market average for standard litigation)")
         
-        # Case complexity multiplier (0.5 = simple, 1.0 = very complex)
-        complexity_multiplier = 1.0 + (case_complexity * 1.8)
+        # Jurisdiction cost multiplier (based on local market rates and complexity)
+        jurisdiction_multiplier = self.cost_multipliers.get(jurisdiction.lower(), 1.0)
+        jurisdiction_explanation = {
+            'california': "Higher attorney rates and complex state procedures",
+            'new_york': "Premium market rates and extensive discovery requirements", 
+            'federal': "Enhanced procedural requirements and longer timelines",
+            'delaware': "Specialized business court efficiency with premium rates",
+            'texas': "Moderate rates with efficient court systems"
+        }.get(jurisdiction.lower(), "Standard jurisdiction baseline")
+        logger.info(f"🏛️ Jurisdiction Multiplier: {jurisdiction_multiplier:.2f}x ({jurisdiction_explanation})")
         
-        # Case value multiplier for high-stakes litigation
+        # Case complexity multiplier (linear scale from simple to very complex)
+        complexity_multiplier = 1.0 + (case_complexity * 1.8)  # Range: 1.0x to 2.8x
+        complexity_desc = "Simple" if case_complexity < 0.3 else "Moderate" if case_complexity < 0.7 else "Complex"
+        logger.info(f"⚖️ Complexity Multiplier: {complexity_multiplier:.2f}x ({complexity_desc} case - {case_complexity*100:.0f}% complexity)")
+        
+        # Case value multiplier (higher stakes = more careful preparation)
         if case_value > 2000000:
             value_multiplier = 1.8
+            value_explanation = "Ultra-high-stakes litigation requiring extensive preparation"
         elif case_value > 1000000:
             value_multiplier = 1.5
+            value_explanation = "High-stakes litigation with elevated preparation standards"
         elif case_value > 500000:
             value_multiplier = 1.3
+            value_explanation = "Significant value case requiring enhanced due diligence"
         else:
             value_multiplier = 1.0
+            value_explanation = "Standard value case with routine preparation requirements"
+        logger.info(f"💲 Value Multiplier: {value_multiplier:.2f}x ({value_explanation})")
         
-        # Evidence strength affects costs (weak evidence = more discovery)
-        evidence_multiplier = 1.0 + ((1.0 - evidence_strength) * 0.6)
+        # Evidence strength multiplier (weak evidence = more discovery needed)
+        evidence_multiplier = 1.0 + ((1.0 - evidence_strength) * 0.6)  # Range: 1.0x to 1.6x
+        evidence_desc = "Strong" if evidence_strength > 0.7 else "Moderate" if evidence_strength > 0.4 else "Weak"
+        logger.info(f"🔍 Evidence Multiplier: {evidence_multiplier:.2f}x ({evidence_desc} evidence requiring {'minimal' if evidence_strength > 0.7 else 'moderate' if evidence_strength > 0.4 else 'extensive'} discovery)")
         
+        # Final cost calculation with step-by-step breakdown
         estimated_total_cost = base_cost * jurisdiction_multiplier * complexity_multiplier * value_multiplier * evidence_multiplier
+        total_multiplier = jurisdiction_multiplier * complexity_multiplier * value_multiplier * evidence_multiplier
+        logger.info(f"📊 COST CALCULATION: ${base_cost:,} × {total_multiplier:.2f} = ${estimated_total_cost:,.0f}")
         
-        # Calculate expected value based on analyses
+        # === TRANSPARENT EXPECTED VALUE CALCULATION ===
+        
         outcome_prediction = analyses.get('outcome_prediction')
         settlement_analysis = analyses.get('settlement_analysis')
         
         if settlement_analysis and hasattr(settlement_analysis, 'metrics'):
-            # Use settlement analysis for expected value
+            # Path 1: Settlement Analysis Available
             settlement_prob = settlement_analysis.metrics.settlement_probability
-            settlement_value = settlement_analysis.metrics.expected_settlement_value
+            raw_settlement_value = settlement_analysis.metrics.expected_settlement_value
+            
+            # CRITICAL FIX: Apply bounds checking to prevent unrealistic settlement values
+            # Settlement value should not exceed case value by more than reasonable multipliers
+            max_reasonable_settlement = case_value * 1.35  # Max 35% premium for damages/interest/costs
+            bounded_settlement_value = min(raw_settlement_value, max_reasonable_settlement)
+            
+            if raw_settlement_value != bounded_settlement_value:
+                logger.warning(f"⚠️ Settlement value bounded: ${raw_settlement_value:,.0f} → ${bounded_settlement_value:,.0f} (max 35% premium applied)")
+            
+            settlement_value = bounded_settlement_value
             
             # Trial outcome probability (if no settlement)
             trial_prob = 1.0 - settlement_prob
-            trial_win_prob = 0.5  # Default
+            trial_win_prob = 0.5  # Default conservative estimate
             if outcome_prediction and hasattr(outcome_prediction, 'probability_breakdown'):
                 trial_win_prob = outcome_prediction.probability_breakdown.get('plaintiff_win', 0.5)
             
-            # Expected value calculation
-            expected_value = (settlement_prob * settlement_value) + (trial_prob * trial_win_prob * case_value) - estimated_total_cost
+            # Expected value calculation with transparent formula
+            settlement_path_value = settlement_prob * settlement_value
+            trial_path_value = trial_prob * trial_win_prob * case_value
+            gross_expected_value = settlement_path_value + trial_path_value
+            expected_value = gross_expected_value - estimated_total_cost
+            
+            logger.info(f"💡 EXPECTED VALUE CALCULATION:")
+            logger.info(f"   Settlement Path: {settlement_prob:.1%} × ${settlement_value:,.0f} = ${settlement_path_value:,.0f}")
+            logger.info(f"   Trial Path: {trial_prob:.1%} × {trial_win_prob:.1%} × ${case_value:,.0f} = ${trial_path_value:,.0f}")
+            logger.info(f"   Gross Expected Value: ${gross_expected_value:,.0f}")
+            logger.info(f"   Net Expected Value: ${gross_expected_value:,.0f} - ${estimated_total_cost:,.0f} = ${expected_value:,.0f}")
+            
         else:
-            # Fallback calculation
+            # Path 2: Fallback calculation with transparent formula
             win_probability = evidence_strength * 0.7 + 0.2  # 20-90% based on evidence strength
-            expected_value = (case_value * win_probability) - estimated_total_cost
+            gross_expected_value = case_value * win_probability
+            expected_value = gross_expected_value - estimated_total_cost
+            
+            logger.info(f"💡 FALLBACK EXPECTED VALUE CALCULATION:")
+            logger.info(f"   Win Probability: ({evidence_strength:.1f} × 0.7) + 0.2 = {win_probability:.1%}")
+            logger.info(f"   Gross Expected Value: ${case_value:,.0f} × {win_probability:.1%} = ${gross_expected_value:,.0f}")
+            logger.info(f"   Net Expected Value: ${gross_expected_value:,.0f} - ${estimated_total_cost:,.0f} = ${expected_value:,.0f}")
         
-        # ROI analysis with multiple scenarios
+        # ROI analysis with transparent scenarios
         roi_scenarios = {
             'best_case': ((case_value * 0.9) - (estimated_total_cost * 0.8)) / estimated_total_cost if estimated_total_cost > 0 else 0,
             'expected_case': expected_value / estimated_total_cost if estimated_total_cost > 0 else 0,
             'worst_case': ((case_value * 0.1) - (estimated_total_cost * 1.2)) / estimated_total_cost if estimated_total_cost > 0 else -1
         }
         
-        logger.info(f"Cost analysis: Total=${estimated_total_cost:,.0f}, Expected value=${expected_value:,.0f}, ROI={roi_scenarios['expected_case']:.1%}")
+        # Enhanced return data with calculation transparency
+        calculation_breakdown = {
+            'base_cost': base_cost,
+            'total_multiplier': total_multiplier,
+            'cost_components': {
+                'jurisdiction': {'multiplier': jurisdiction_multiplier, 'explanation': jurisdiction_explanation},
+                'complexity': {'multiplier': complexity_multiplier, 'description': complexity_desc, 'percentage': case_complexity * 100},
+                'case_value': {'multiplier': value_multiplier, 'explanation': value_explanation},
+                'evidence': {'multiplier': evidence_multiplier, 'description': evidence_desc, 'strength_score': evidence_strength * 10}
+            },
+            'value_calculation_method': 'settlement_analysis' if settlement_analysis else 'fallback_probability'
+        }
+        
+        logger.info(f"✅ Final Analysis: Cost=${estimated_total_cost:,.0f}, Expected Value=${expected_value:,.0f}, ROI={roi_scenarios['expected_case']:.1%}")
         
         return {
             'total_cost': estimated_total_cost,
@@ -1095,6 +1165,13 @@ class LitigationStrategyOptimizer:
                 'complexity_multiplier': complexity_multiplier,
                 'value_multiplier': value_multiplier,
                 'evidence_multiplier': evidence_multiplier
+            },
+            'calculation_breakdown': calculation_breakdown,  # New transparent breakdown
+            'calculation_transparency': {
+                'formula': 'Expected Value = (Settlement Path + Trial Path) - Litigation Costs',
+                'cost_formula': f'Costs = ${base_cost:,} × {total_multiplier:.2f} = ${estimated_total_cost:,.0f}',
+                'bounds_applied': raw_settlement_value != bounded_settlement_value if settlement_analysis and hasattr(settlement_analysis, 'metrics') else False,
+                'confidence_level': 'high' if settlement_analysis else 'moderate'
             }
         }
 
