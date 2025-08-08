@@ -1239,6 +1239,11 @@ class LitigationStrategyOptimizer:
 
             RECOMMENDED STRATEGY: {strategy_type.value.replace('_', ' ').title()}
 
+            CRITICAL: Include a section explaining cost and value calculations with transparency. Our system uses bounded calculations to prevent unrealistic projections:
+            - Settlement values are capped at 135% of case value to account for reasonable damages/interest/costs
+            - Expected values use probability-weighted outcomes: (Settlement Path + Trial Path) - Litigation Costs
+            - All multipliers are documented and bounded to realistic professional ranges
+
             Provide a comprehensive strategic analysis covering:
 
             1. EXECUTIVE SUMMARY (2-3 sentences)
@@ -1263,17 +1268,22 @@ class LitigationStrategyOptimizer:
             - Trial readiness requirements and timeline
             - Risk-benefit analysis for each path
 
-            6. RESOURCE ALLOCATION AND TIMELINE
+            6. COST-BENEFIT TRANSPARENCY
+            - Explain how litigation costs are calculated (jurisdiction, complexity, value, evidence factors)
+            - Clarify expected value methodology and bounds checking
+            - Justify financial projections with clear reasoning
+
+            7. RESOURCE ALLOCATION AND TIMELINE
             - Critical deadlines and milestones
             - Budget considerations and cost control
             - Team composition and expertise requirements
 
-            7. ALTERNATIVE STRATEGIES
+            8. ALTERNATIVE STRATEGIES
             - Backup plans if primary strategy fails
             - Creative legal approaches to consider
             - Risk mitigation for unfavorable developments
 
-            Focus on actionable insights that will help legal counsel make informed strategic decisions. Be specific about timing, costs, and probability assessments.
+            Focus on actionable insights that will help legal counsel make informed strategic decisions. Be specific about timing, costs, and probability assessments. Always explain the basis for financial calculations to ensure trustworthy recommendations.
             """
             
             # Use Gemini AI if available, fallback to Groq
