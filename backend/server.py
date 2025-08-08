@@ -13609,6 +13609,9 @@ if LITIGATION_ANALYTICS_AVAILABLE:
         mitigation_strategies: List[str] = []
         ai_strategic_summary: str = ""
         alternative_strategies: List[Dict[str, Any]] = []
+        # New transparency fields
+        calculation_breakdown: Optional[Dict[str, Any]] = None
+        calculation_transparency: Optional[Dict[str, Any]] = None
     
     @api_router.post("/litigation/analyze-case", response_model=CaseAnalysisResponse)
     async def analyze_litigation_case(request: CaseAnalysisRequest):
