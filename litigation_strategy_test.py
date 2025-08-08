@@ -1,31 +1,29 @@
 #!/usr/bin/env python3
 """
-AI-Powered Litigation Strategy Optimizer Testing
-===============================================
+Litigation Strategy Generation Transparent Calculations Testing
+==============================================================
 
-Comprehensive testing of the enhanced AI-Powered Litigation Strategy Optimizer
-with focus on the specific issues reported by the user:
+Comprehensive testing of the improved litigation strategy generation with transparent calculations.
 
-1. Fix for evidence strength display bug (should show as 70% not 700%)
-2. Realistic cost estimates proportional to $750k case value
-3. Enhanced AI strategic summary generation
-4. Proper case complexity handling (65% input vs output)
-5. Specific, actionable recommendations relevant to breach of contract case
-6. Settlement probability derivation and explanation
-7. Professional-grade analysis suitable for lawyers
+SPECIFIC TEST REQUIREMENTS:
+1. Test the enhanced POST /api/litigation/strategy-recommendations endpoint
+2. Verify bounds checking: Expected settlement value should NOT exceed $750k × 1.35 = $1,012,500
+3. Verify calculation_breakdown field with transparent multipliers
+4. Verify calculation_transparency field showing formulas and bounds_applied status
+5. Verify cost calculation step-by-step breakdown with explanations
+6. Check AI strategic summary includes cost-benefit transparency section
+
+This addresses the previous issue where expected settlement value was $2,054,124 (2.7x case value).
 
 ENDPOINT: POST /api/litigation/strategy-recommendations
 
 TEST DATA: Exact case data from review request:
-- Case Type: Civil – Breach of Contract
+- Case Type: Civil - Breach of Contract
 - Jurisdiction: California  
 - Court Level: District Court
 - Judge Name: Judge Sarah Martinez
-- Case Value ($): 750,000
-- Client Budget ($): 150,000
-- Number of Witnesses: 4
-- Opposing Counsel: Smith & Associates
-- Evidence Strength (1-10): 7
+- Case Value: $750,000
+- Evidence Strength: 7/10
 - Case Complexity: 65% (0.65)
 - Case Facts: Technology startup vs hardware supplier breach of contract case
 """
