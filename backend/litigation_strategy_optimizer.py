@@ -1095,6 +1095,8 @@ class LitigationStrategyOptimizer:
         
         outcome_prediction = analyses.get('outcome_prediction')
         settlement_analysis = analyses.get('settlement_analysis')
+        raw_settlement_value = 0  # Initialize to prevent undefined variable
+        bounded_settlement_value = 0
         
         if settlement_analysis and hasattr(settlement_analysis, 'metrics'):
             # Path 1: Settlement Analysis Available
