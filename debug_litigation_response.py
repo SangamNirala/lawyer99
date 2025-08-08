@@ -10,7 +10,7 @@ import aiohttp
 import json
 import os
 
-BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://8fa35272-f813-4f54-99e2-91d7f9fb1b50.preview.emergentagent.com')
+BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://027a3f35-a0bc-40cd-ad79-483d46c6126e.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
 async def debug_response_structure():
