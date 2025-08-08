@@ -14255,7 +14255,9 @@ if LITIGATION_ANALYTICS_AVAILABLE:
                 risk_factors=strategy.risk_factors,
                 mitigation_strategies=strategy.mitigation_strategies,
                 ai_strategic_summary=strategy.ai_strategic_summary,
-                alternative_strategies=strategy.alternative_strategies
+                alternative_strategies=strategy.alternative_strategies,
+                calculation_breakdown=strategy.calculation_breakdown,
+                calculation_transparency=strategy.calculation_transparency
             )
             
         except Exception as e:
