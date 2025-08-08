@@ -28,7 +28,7 @@ from datetime import datetime
 from typing import Dict, Any, List
 
 # Backend URL from environment
-BACKEND_URL = "https://93a8c601-fd30-4f56-a2f2-47103260abd2.preview.emergentagent.com/api"
+BACKEND_URL = "https://8fa35272-f813-4f54-99e2-91d7f9fb1b50.preview.emergentagent.com/api"
 
 def test_standard_settlement_analysis():
     """Test standard settlement probability analysis endpoint"""
