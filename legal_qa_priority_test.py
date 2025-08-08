@@ -4,7 +4,7 @@ import time
 from datetime import datetime
 
 class LegalQAPriorityTester:
-    def __init__(self, base_url="https://2f2d481e-aaaa-4270-8036-472eb5d6f679.preview.emergentagent.com"):
+    def __init__(self, base_url="https://93a8c601-fd30-4f56-a2f2-47103260abd2.preview.emergentagent.com"):
         self.base_url = base_url
         self.api_url = f"{base_url}/api"
         self.session_id = f"priority-test-{int(time.time())}"

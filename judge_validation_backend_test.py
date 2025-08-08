@@ -12,7 +12,7 @@ from urllib.parse import quote
 from datetime import datetime
 
 # Backend URL from environment
-BACKEND_URL = "https://2f2d481e-aaaa-4270-8036-472eb5d6f679.preview.emergentagent.com/api"
+BACKEND_URL = "https://93a8c601-fd30-4f56-a2f2-47103260abd2.preview.emergentagent.com/api"
 
 def test_individual_judge_analysis():
     """Test individual judge analysis endpoint with validation system"""

@@ -5,7 +5,7 @@ from datetime import datetime
 
 class FocusedAttorneyInvestigation:
     def __init__(self):
-        self.api_url = "https://2f2d481e-aaaa-4270-8036-472eb5d6f679.preview.emergentagent.com/api"
+        self.api_url = "https://93a8c601-fd30-4f56-a2f2-47103260abd2.preview.emergentagent.com/api"
         self.working_review_ids = [
             'cef9d675-7285-4c1c-8031-a5572bad5946',
             'b57f7ca3-24c1-4769-878b-afbbcf37814f'
