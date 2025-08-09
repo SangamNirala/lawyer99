@@ -1458,7 +1458,7 @@ const AppealAnalysis = () => {
         <CardHeader>
           <CardTitle>Case Information</CardTitle>
           <CardDescription>
-            Enter case details for comprehensive appeal probability analysis
+            Enter case details for comprehensive analysis of appeal filing likelihood and success probability
           </CardDescription>
         </CardHeader>
         <CardContent>
