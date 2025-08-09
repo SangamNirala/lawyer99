@@ -13438,6 +13438,16 @@ if LITIGATION_ANALYTICS_AVAILABLE:
         witness_count: Optional[int] = None
         settlement_offers: List[float] = []
     
+    class CaseFactsAnalysisData(BaseModel):
+        """TASK 2: AI-suggested evidence strength and case complexity"""
+        evidence_strength_suggested: float
+        case_complexity_suggested: float
+        analysis_confidence: float
+        evidence_reasoning: str
+        complexity_reasoning: str
+        key_evidence_factors: List[str] = []
+        complexity_factors: List[str] = []
+
     class AppealAnalysisData(BaseModel):
         appeal_probability: float
         appeal_confidence: float
@@ -13447,6 +13457,8 @@ if LITIGATION_ANALYTICS_AVAILABLE:
         appeal_success_probability: Optional[float] = None
         preventive_measures: List[str] = []
         jurisdictional_appeal_rate: Optional[float] = None
+        # TASK 2: Include AI-suggested evidence/complexity analysis
+        case_facts_analysis: Optional[CaseFactsAnalysisData] = None
 
     class CaseAnalysisResponse(BaseModel):
         case_id: str
