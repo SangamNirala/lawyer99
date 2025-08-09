@@ -593,8 +593,8 @@ class LitigationAnalyticsEngine:
         if not case_complexity:
             return 1.0
         
-        # Higher complexity = higher appeal probability (more legal issues to challenge)
-        return 1.0 + (case_complexity * 0.6)
+        # Higher complexity = higher appeal probability (reduced impact)
+        return 1.0 + (case_complexity * 0.4)  # Reduced from 0.6 to 0.4
 
     def _get_judge_appeal_multiplier(self, judge_insights: Optional[JudgeInsights]) -> float:
         """Get appeal probability multiplier based on judge's appeal rate history"""
