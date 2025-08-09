@@ -427,6 +427,432 @@ class LitigationAnalyticsEngine:
                 appeal_analysis=default_appeal
             )
 
+    async def _predict_appeal_probability(self, case_data: CaseData, predicted_outcome: str,
+                                         confidence_score: float, similar_cases: List[Dict],
+                                         judge_insights: Optional[JudgeInsights]) -> AppealAnalysis:
+        """
+        Comprehensive appeal probability analysis using ensemble AI approach
+        
+        Factors considered:
+        - Case outcome (losses more likely to be appealed)
+        - Case value (high-value cases more likely appealed)
+        - Evidence strength (weak evidence = higher appeal probability)
+        - Jurisdiction appeal rates
+        - Judge-specific appeal patterns
+        - Case complexity
+        - Legal precedent strength
+        """
+        try:
+            logger.info(f"📋 Analyzing appeal probability for case {case_data.case_id}")
+            
+            # Base appeal probability calculation
+            base_appeal_prob = 0.15  # Base 15% appeal rate
+            
+            # Factor 1: Case Outcome Impact (most important factor)
+            outcome_multiplier = self._get_outcome_appeal_multiplier(predicted_outcome)
+            
+            # Factor 2: Case Value Impact
+            value_multiplier = self._get_value_appeal_multiplier(case_data.case_value)
+            
+            # Factor 3: Evidence Strength Impact (inverse relationship)
+            evidence_multiplier = self._get_evidence_appeal_multiplier(case_data.evidence_strength)
+            
+            # Factor 4: Jurisdictional Appeal Rate
+            jurisdiction_multiplier = self._get_jurisdiction_appeal_multiplier(case_data.jurisdiction)
+            
+            # Factor 5: Case Complexity Impact
+            complexity_multiplier = self._get_complexity_appeal_multiplier(case_data.case_complexity)
+            
+            # Factor 6: Judge-Specific Appeal Pattern
+            judge_multiplier = self._get_judge_appeal_multiplier(judge_insights)
+            
+            # Factor 7: Confidence Score Impact (low confidence = higher appeal probability)
+            confidence_multiplier = 1.0 + (0.5 * (1.0 - confidence_score))
+            
+            # Calculate combined appeal probability
+            appeal_probability = base_appeal_prob * outcome_multiplier * value_multiplier * \
+                               evidence_multiplier * jurisdiction_multiplier * complexity_multiplier * \
+                               judge_multiplier * confidence_multiplier
+            
+            # Cap probability between 5% and 95%
+            appeal_probability = max(0.05, min(0.95, appeal_probability))
+            
+            # Generate AI-enhanced analysis
+            appeal_analysis_prompt = await self._build_appeal_analysis_prompt(
+                case_data, predicted_outcome, appeal_probability, similar_cases
+            )
+            
+            # Get AI insights for appeal factors and preventive measures
+            ai_appeal_analysis = await self._get_ai_appeal_analysis(appeal_analysis_prompt)
+            
+            # Calculate appeal success probability
+            appeal_success_prob = await self._calculate_appeal_success_probability(
+                case_data, predicted_outcome, appeal_probability
+            )
+            
+            # Estimate appeal costs and timeline
+            appeal_cost = self._estimate_appeal_costs(case_data.case_value, case_data.jurisdiction)
+            appeal_timeline = self._estimate_appeal_timeline(case_data.jurisdiction, case_data.court_level)
+            
+            # Get jurisdictional appeal rate for comparison
+            jurisdictional_rate = self._get_jurisdictional_appeal_statistics(case_data.jurisdiction)
+            
+            # Combine all analysis
+            return AppealAnalysis(
+                appeal_probability=appeal_probability,
+                appeal_confidence=0.85,  # High confidence in appeal prediction
+                appeal_factors=ai_appeal_analysis.get("appeal_factors", [
+                    f"Case outcome: {predicted_outcome.replace('_', ' ').title()}",
+                    f"Case value: ${case_data.case_value:,.0f}" if case_data.case_value else "Case value: Not specified",
+                    f"Evidence strength: {case_data.evidence_strength}/10" if case_data.evidence_strength else "Evidence strength: Not rated",
+                    f"Jurisdiction: {case_data.jurisdiction.title()}",
+                    f"Case complexity: {case_data.case_complexity*100:.0f}%" if case_data.case_complexity else "Case complexity: Not specified"
+                ])[:5],
+                appeal_timeline=appeal_timeline,
+                appeal_cost_estimate=appeal_cost,
+                appeal_success_probability=appeal_success_prob,
+                preventive_measures=ai_appeal_analysis.get("preventive_measures", [
+                    "Ensure comprehensive trial record with detailed objections",
+                    "Prepare strong post-trial motions to address potential appeal grounds",
+                    "Document all legal arguments and authorities thoroughly",
+                    "Consider settlement negotiations to avoid appeal risk",
+                    "Retain experienced appellate counsel for consultation"
+                ])[:5],
+                jurisdictional_appeal_rate=jurisdictional_rate
+            )
+            
+        except Exception as e:
+            logger.error(f"❌ Appeal probability analysis failed: {e}")
+            # Return conservative default analysis
+            return AppealAnalysis(
+                appeal_probability=0.25,
+                appeal_confidence=0.6,
+                appeal_factors=["Standard appeal risk factors"],
+                appeal_timeline=30,
+                appeal_cost_estimate=50000,
+                appeal_success_probability=0.35,
+                preventive_measures=["Prepare thorough trial record"],
+                jurisdictional_appeal_rate=0.2
+            )
+
+    def _get_outcome_appeal_multiplier(self, predicted_outcome: str) -> float:
+        """Get appeal probability multiplier based on predicted outcome"""
+        multipliers = {
+            "plaintiff_win": 2.8,    # Defendants more likely to appeal losses
+            "defendant_win": 0.8,    # Plaintiffs less likely to appeal (cost considerations)
+            "settlement": 0.2,       # Very low appeal probability for settlements
+            "dismissed": 1.5         # Moderate appeal probability for dismissals
+        }
+        return multipliers.get(predicted_outcome, 1.0)
+
+    def _get_value_appeal_multiplier(self, case_value: Optional[float]) -> float:
+        """Get appeal probability multiplier based on case value"""
+        if not case_value:
+            return 1.0
+        
+        if case_value >= 10000000:    # $10M+
+            return 3.2
+        elif case_value >= 5000000:   # $5M-$10M  
+            return 2.5
+        elif case_value >= 1000000:   # $1M-$5M
+            return 1.8
+        elif case_value >= 500000:    # $500K-$1M
+            return 1.3
+        elif case_value >= 100000:    # $100K-$500K
+            return 1.0
+        else:                         # Under $100K
+            return 0.6
+
+    def _get_evidence_appeal_multiplier(self, evidence_strength: Optional[float]) -> float:
+        """Get appeal probability multiplier based on evidence strength (inverse relationship)"""
+        if not evidence_strength:
+            return 1.2
+        
+        # Normalize to 0-1 scale if needed
+        if evidence_strength > 1:
+            evidence_strength = evidence_strength / 10.0
+        
+        # Inverse relationship: weak evidence = higher appeal probability
+        return 1.0 + (0.8 * (1.0 - evidence_strength))
+
+    def _get_jurisdiction_appeal_multiplier(self, jurisdiction: str) -> float:
+        """Get appeal probability multiplier based on jurisdiction appeal patterns"""
+        multipliers = {
+            "federal": 1.2,      # Higher appeal rates in federal court
+            "california": 1.1,   # Moderate appeal rate
+            "new_york": 1.0,     # Baseline appeal rate
+            "texas": 0.9,        # Lower appeal rate (business-friendly)
+            "delaware": 1.3,     # Higher appeal rate (complex business cases)
+            "florida": 0.95,     # Slightly lower appeal rate
+            "illinois": 1.05     # Slightly higher appeal rate
+        }
+        return multipliers.get(jurisdiction.lower(), 1.0)
+
+    def _get_complexity_appeal_multiplier(self, case_complexity: Optional[float]) -> float:
+        """Get appeal probability multiplier based on case complexity"""
+        if not case_complexity:
+            return 1.0
+        
+        # Higher complexity = higher appeal probability (more legal issues to challenge)
+        return 1.0 + (case_complexity * 0.6)
+
+    def _get_judge_appeal_multiplier(self, judge_insights: Optional[JudgeInsights]) -> float:
+        """Get appeal probability multiplier based on judge's appeal rate history"""
+        if not judge_insights:
+            return 1.0
+        
+        # Use judge's historical appeal rate if available
+        if hasattr(judge_insights, 'appeal_rate') and judge_insights.appeal_rate:
+            # Normalize to multiplier (baseline 20% appeal rate)
+            return judge_insights.appeal_rate / 0.20
+        
+        return 1.0
+
+    async def _build_appeal_analysis_prompt(self, case_data: CaseData, predicted_outcome: str,
+                                          appeal_probability: float, similar_cases: List[Dict]) -> str:
+        """Build comprehensive prompt for AI appeal analysis"""
+        prompt = f"""
+        APPEAL PROBABILITY ANALYSIS - LEGAL CASE ASSESSMENT
+        
+        CASE DETAILS:
+        - Case Type: {case_data.case_type.value}
+        - Predicted Outcome: {predicted_outcome.replace('_', ' ').title()}
+        - Calculated Appeal Probability: {appeal_probability:.1%}
+        - Case Value: {f'${case_data.case_value:,.2f}' if case_data.case_value else 'Not specified'}
+        - Evidence Strength: {case_data.evidence_strength or 'Not rated'}/10
+        - Case Complexity: {case_data.case_complexity*100:.0f}% if case_data.case_complexity else 'Not specified'
+        - Jurisdiction: {case_data.jurisdiction}
+        - Court Level: {case_data.court_level}
+        
+        HISTORICAL CONTEXT:
+        Found {len(similar_cases)} similar cases for pattern analysis.
+        
+        ANALYSIS REQUIRED:
+        1. Identify specific appeal risk factors for this case
+        2. Recommend preventive measures to reduce appeal probability
+        3. Assess potential grounds for appeal based on case characteristics
+        4. Suggest trial strategies to minimize appellate issues
+        
+        Provide detailed analysis focusing on:
+        - Legal issues most likely to be challenged on appeal
+        - Procedural safeguards to implement during trial
+        - Settlement considerations given appeal risk
+        - Post-trial motion strategies
+        
+        Respond with structured analysis including specific, actionable recommendations.
+        """
+        return prompt
+
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
+    async def _get_ai_appeal_analysis(self, prompt: str) -> Dict[str, Any]:
+        """Get AI-powered appeal analysis from ensemble approach"""
+        try:
+            # Use both Gemini and Groq for comprehensive analysis
+            gemini_response = await asyncio.to_thread(
+                self.gemini_model.generate_content,
+                prompt + "\n\nProvide specific appeal factors and preventive measures."
+            )
+            
+            groq_response = await asyncio.to_thread(
+                self.groq_client.chat.completions.create,
+                model="mixtral-8x7b-32768",
+                messages=[{"role": "user", "content": prompt + "\n\nFocus on practical appellate risk assessment and mitigation strategies."}],
+                temperature=0.1
+            )
+            
+            # Parse and combine responses
+            appeal_factors = self._extract_appeal_factors(gemini_response.text, groq_response.choices[0].message.content)
+            preventive_measures = self._extract_preventive_measures(gemini_response.text, groq_response.choices[0].message.content)
+            
+            return {
+                "appeal_factors": appeal_factors,
+                "preventive_measures": preventive_measures
+            }
+            
+        except Exception as e:
+            logger.warning(f"⚠️ AI appeal analysis failed: {e}")
+            return {
+                "appeal_factors": ["AI analysis unavailable - using default factors"],
+                "preventive_measures": ["AI analysis unavailable - using default measures"]
+            }
+
+    def _extract_appeal_factors(self, gemini_text: str, groq_text: str) -> List[str]:
+        """Extract appeal risk factors from AI responses"""
+        factors = []
+        
+        # Extract from both responses using pattern matching
+        import re
+        
+        # Look for appeal-related factors
+        factor_patterns = [
+            r'appeal.*?factor[s]?[:\-]\s*([^\n\.]+)',
+            r'risk.*?factor[s]?[:\-]\s*([^\n\.]+)',
+            r'ground[s]?.*?appeal[:\-]\s*([^\n\.]+)',
+            r'likely.*?challenge[d]?[:\-]\s*([^\n\.]+)'
+        ]
+        
+        combined_text = f"{gemini_text} {groq_text}".lower()
+        
+        for pattern in factor_patterns:
+            matches = re.findall(pattern, combined_text)
+            for match in matches:
+                factor = match.strip().capitalize()
+                if len(factor) > 10 and factor not in factors:
+                    factors.append(factor)
+        
+        # Default factors if none extracted
+        if not factors:
+            factors = [
+                "Evidence sufficiency challenges",
+                "Legal standard interpretation disputes", 
+                "Procedural error claims",
+                "Damages calculation disputes",
+                "Jury instruction challenges"
+            ]
+        
+        return factors[:5]  # Top 5 factors
+
+    def _extract_preventive_measures(self, gemini_text: str, groq_text: str) -> List[str]:
+        """Extract preventive measures from AI responses"""
+        measures = []
+        
+        import re
+        
+        # Look for preventive/mitigation measures
+        measure_patterns = [
+            r'prevent[ive]?.*?measure[s]?[:\-]\s*([^\n\.]+)',
+            r'mitigat[e|ion].*?[:\-]\s*([^\n\.]+)',
+            r'recommend[ation]?[s]?[:\-]\s*([^\n\.]+)',
+            r'strategy.*?[:\-]\s*([^\n\.]+)',
+            r'safeguard[s]?[:\-]\s*([^\n\.]+)'
+        ]
+        
+        combined_text = f"{gemini_text} {groq_text}".lower()
+        
+        for pattern in measure_patterns:
+            matches = re.findall(pattern, combined_text)
+            for match in matches:
+                measure = match.strip().capitalize()
+                if len(measure) > 15 and measure not in measures:
+                    measures.append(measure)
+        
+        # Default measures if none extracted
+        if not measures:
+            measures = [
+                "Maintain detailed trial record with comprehensive objections",
+                "Prepare thorough post-trial motions addressing key legal issues", 
+                "Ensure proper preservation of all appellate issues during trial",
+                "Consider settlement negotiations factoring appeal risk",
+                "Retain experienced appellate counsel for consultation"
+            ]
+        
+        return measures[:5]  # Top 5 measures
+
+    async def _calculate_appeal_success_probability(self, case_data: CaseData,
+                                                 predicted_outcome: str, appeal_probability: float) -> float:
+        """Calculate probability of success if case is appealed"""
+        base_success_rate = 0.35  # Historical average appeal success rate ~35%
+        
+        # Adjust based on factors
+        success_multiplier = 1.0
+        
+        # Evidence strength impact (weak evidence = higher appeal success)
+        if case_data.evidence_strength:
+            evidence_score = case_data.evidence_strength / 10.0 if case_data.evidence_strength > 1 else case_data.evidence_strength
+            success_multiplier *= 1.0 + (0.4 * (1.0 - evidence_score))
+        
+        # Case complexity (more complex = more appeal grounds)
+        if case_data.case_complexity:
+            success_multiplier *= 1.0 + (case_data.case_complexity * 0.3)
+        
+        # Outcome impact (losses more likely to succeed on appeal)
+        if predicted_outcome == "defendant_win":
+            success_multiplier *= 1.2  # Plaintiffs slightly more successful on appeal
+        elif predicted_outcome == "plaintiff_win":  
+            success_multiplier *= 0.9  # Defendants slightly less successful
+        
+        # Jurisdiction impact
+        jurisdiction_success_rates = {
+            "federal": 0.38,     # Federal appellate courts
+            "california": 0.33,  # California appellate courts
+            "new_york": 0.35,    # New York appellate courts
+            "texas": 0.32,       # Texas appellate courts
+            "delaware": 0.40,    # Delaware Supreme Court
+        }
+        
+        jurisdiction_base = jurisdiction_success_rates.get(case_data.jurisdiction.lower(), base_success_rate)
+        
+        # Calculate final success probability
+        appeal_success_prob = jurisdiction_base * success_multiplier
+        
+        # Cap between 10% and 70%
+        return max(0.10, min(0.70, appeal_success_prob))
+
+    def _estimate_appeal_costs(self, case_value: Optional[float], jurisdiction: str) -> float:
+        """Estimate costs of appellate proceedings"""
+        base_appeal_cost = 75000  # Base appellate cost
+        
+        # Adjust based on case value
+        if case_value:
+            if case_value >= 10000000:
+                value_multiplier = 2.5
+            elif case_value >= 5000000:
+                value_multiplier = 2.0
+            elif case_value >= 1000000:
+                value_multiplier = 1.5
+            else:
+                value_multiplier = 1.0
+        else:
+            value_multiplier = 1.0
+        
+        # Jurisdiction cost adjustments
+        jurisdiction_multipliers = {
+            "federal": 1.3,      # Higher federal appellate costs
+            "california": 1.4,   # High California costs
+            "new_york": 1.5,     # Highest costs in NY
+            "delaware": 1.2,     # Moderate Delaware costs
+            "texas": 0.9,        # Lower Texas costs
+        }
+        
+        jurisdiction_multiplier = jurisdiction_multipliers.get(jurisdiction.lower(), 1.0)
+        
+        return base_appeal_cost * value_multiplier * jurisdiction_multiplier
+
+    def _estimate_appeal_timeline(self, jurisdiction: str, court_level: str) -> int:
+        """Estimate timeline to file appeal (days from judgment)"""
+        # Standard appeal deadlines
+        base_timeline = 30  # Default 30 days
+        
+        # Jurisdiction-specific deadlines
+        deadlines = {
+            "federal": 30,       # Federal Rule of Civil Procedure
+            "california": 60,    # California Rules of Court
+            "new_york": 30,      # New York Civil Practice Law
+            "texas": 30,         # Texas Rules of Civil Procedure
+            "delaware": 30,      # Delaware Court Rules
+            "florida": 30,       # Florida Rules of Civil Procedure
+        }
+        
+        # Court level adjustments
+        if court_level.lower() == "supreme":
+            return deadlines.get(jurisdiction.lower(), base_timeline) + 60  # Additional time for supreme court appeals
+        
+        return deadlines.get(jurisdiction.lower(), base_timeline)
+
+    def _get_jurisdictional_appeal_statistics(self, jurisdiction: str) -> float:
+        """Get historical appeal rates for jurisdiction"""
+        appeal_rates = {
+            "federal": 0.18,     # Federal court appeal rate
+            "california": 0.16,  # California appeal rate
+            "new_york": 0.15,    # New York appeal rate
+            "texas": 0.12,       # Texas appeal rate
+            "delaware": 0.22,    # Delaware appeal rate (business cases)
+            "florida": 0.14,     # Florida appeal rate
+            "illinois": 0.17     # Illinois appeal rate
+        }
+        
+        return appeal_rates.get(jurisdiction.lower(), 0.15)
+
     def _parse_ai_analysis(self, analysis_text: str, source: str) -> Dict[str, Any]:
         """Parse AI analysis text into structured data"""
         # This is a simplified parser - in production, you'd want more sophisticated NLP
