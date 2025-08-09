@@ -265,6 +265,21 @@ IMPLEMENTATION COMPLETED:
 READY FOR TESTING: All backend endpoints enhanced with web search capabilities and frontend updated to display reference links and handle no-information cases appropriately."
 
 backend:
+  - task: "Appeal Probability Analysis Endpoints Fix"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py, /app/backend/requirements.txt, /app/backend/litigation_analytics_engine.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: false
+        -agent: "user"
+        -comment: "USER REPORTED CRITICAL ERROR: In Litigation Analytics Engine tab, within the Appeal Probability Analysis section when user fills details and clicks 'Appeal Analysis Probability' button, gets error 'Failed to analyze appeal probability. Please try again.' Console shows 404 for /api/litigation/analytics-dashboard and 503 for /api/litigation/appeal-analysis endpoints."
+        -working: true
+        -agent: "main"
+        -comment: "🔧 CRITICAL BACKEND DEPENDENCY FIX IMPLEMENTED: Resolved the root cause of 404/503 errors for litigation analytics endpoints. PROBLEM: 'Litigation Analytics Engine not available: No module named jinja2' - missing dependencies (jinja2, tiktoken, tokenizers) prevented endpoint registration. SOLUTION: Added missing dependencies to requirements.txt, restarted backend service. VERIFICATION: Both endpoints now operational - GET /api/litigation/analytics-dashboard (200 OK), POST /api/litigation/appeal-analysis (200 OK). Comprehensive appeal probability analysis with AI ensemble approach, cost/timeline estimates, preventive measures, and full analytics dashboard with case statistics, jurisdictional patterns, and appeal risk metrics all functional."
+
   - task: "Litigation Strategy Risk Factors Generation Fix"
     implemented: true
     working: true
