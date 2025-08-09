@@ -578,13 +578,13 @@ class LitigationAnalyticsEngine:
     def _get_jurisdiction_appeal_multiplier(self, jurisdiction: str) -> float:
         """Get appeal probability multiplier based on jurisdiction appeal patterns"""
         multipliers = {
-            "federal": 1.2,      # Higher appeal rates in federal court
-            "california": 1.1,   # Moderate appeal rate
+            "federal": 1.15,     # Reduced from 1.2
+            "california": 1.05,  # Reduced from 1.1
             "new_york": 1.0,     # Baseline appeal rate
-            "texas": 0.9,        # Lower appeal rate (business-friendly)
-            "delaware": 1.3,     # Higher appeal rate (complex business cases)
-            "florida": 0.95,     # Slightly lower appeal rate
-            "illinois": 1.05     # Slightly higher appeal rate
+            "texas": 0.95,       # Reduced from 0.9
+            "delaware": 1.2,     # Reduced from 1.3
+            "florida": 0.97,     # Slightly reduced from 0.95
+            "illinois": 1.02     # Reduced from 1.05
         }
         return multipliers.get(jurisdiction.lower(), 1.0)
 
