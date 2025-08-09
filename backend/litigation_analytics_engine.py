@@ -729,7 +729,7 @@ class LitigationAnalyticsEngine:
             # TASK 2: Add AI-powered case facts analysis for evidence/complexity correlation
             case_facts_analysis = None
             if case_data.case_facts:
-                case_facts_analysis = await self._analyze_case_facts_ai(case_data.case_facts, case_data.case_type)
+                case_facts_analysis = await self._analyze_case_facts_ai(case_data.case_facts, case_data.case_type.value)
             
             logger.info(f"✅ Appeal analysis complete. Mode: {ai_analysis_mode}, Confidence: {appeal_confidence:.0%}")
             
