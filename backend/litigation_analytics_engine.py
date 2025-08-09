@@ -71,6 +71,17 @@ class CaseData:
     settlement_offers: List[float] = field(default_factory=list)
 
 @dataclass
+class CaseFactsAnalysis:
+    """Structure for AI-powered case facts analysis - TASK 2: Evidence/Complexity Correlation"""
+    evidence_strength_suggested: float  # AI-suggested evidence strength (1-10)
+    case_complexity_suggested: float   # AI-suggested complexity (0-1)
+    analysis_confidence: float         # Confidence in AI analysis (0-1)
+    evidence_reasoning: str           # Explanation for evidence strength
+    complexity_reasoning: str        # Explanation for complexity
+    key_evidence_factors: List[str] = field(default_factory=list)
+    complexity_factors: List[str] = field(default_factory=list)
+
+@dataclass
 class AppealAnalysis:
     """Structure for appeal probability analysis"""
     appeal_probability: float
@@ -81,6 +92,8 @@ class AppealAnalysis:
     appeal_success_probability: Optional[float] = None
     preventive_measures: List[str] = field(default_factory=list)
     jurisdictional_appeal_rate: Optional[float] = None
+    # TASK 2: Add AI-suggested values for evidence/complexity correlation
+    case_facts_analysis: Optional[CaseFactsAnalysis] = None
 
 @dataclass
 class PredictionResult:
