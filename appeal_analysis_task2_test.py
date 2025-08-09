@@ -72,6 +72,10 @@ def test_appeal_analysis_evidence_complexity_correlation():
         if response.status_code == 200:
             data = response.json()
             
+            # Print full response for debugging
+            print(f"\n🔍 FULL RESPONSE STRUCTURE:")
+            print(f"Response keys: {list(data.keys())}")
+            
             # Check if case_facts_analysis exists
             case_facts_analysis = data.get('case_facts_analysis')
             if not case_facts_analysis:
@@ -79,6 +83,7 @@ def test_appeal_analysis_evidence_complexity_correlation():
                 test_results.append(False)
                 return test_results
             
+            print(f"case_facts_analysis keys: {list(case_facts_analysis.keys()) if case_facts_analysis else 'None'}")
             print("\n🔍 CASE FACTS ANALYSIS VALIDATION:")
             print(f"case_facts_analysis present: ✅")
             
