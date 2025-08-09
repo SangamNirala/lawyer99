@@ -7,7 +7,7 @@ import requests
 import json
 import sys
 
-BACKEND_URL = "https://9c72c586-5126-47dc-85cc-7afca9190d08.preview.emergentagent.com/api"
+BACKEND_URL = "https://b2e17d7f-d715-45b1-acd0-e51dd70d439b.preview.emergentagent.com/api"
 
 def test_simple_litigation_strategy():
     """Test with minimal data to debug the issue"""

@@ -25,7 +25,7 @@ from typing import Dict, List, Any, Optional
 import uuid
 
 # Get backend URL from environment
-BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://9c72c586-5126-47dc-85cc-7afca9190d08.preview.emergentagent.com')
+BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://b2e17d7f-d715-45b1-acd0-e51dd70d439b.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
 class LitigationAnalyticsTestSuite:

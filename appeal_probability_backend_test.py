@@ -35,7 +35,7 @@ from datetime import datetime
 from typing import Dict, Any, List
 
 # Backend URL from environment
-BACKEND_URL = "https://9c72c586-5126-47dc-85cc-7afca9190d08.preview.emergentagent.com/api"
+BACKEND_URL = "https://b2e17d7f-d715-45b1-acd0-e51dd70d439b.preview.emergentagent.com/api"
 
 def test_dedicated_appeal_analysis_endpoint():
     """Test POST /api/litigation/appeal-analysis with comprehensive case data"""
