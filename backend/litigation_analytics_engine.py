@@ -384,6 +384,11 @@ class LitigationAnalyticsEngine:
                 groq_prediction.get("recommendations", [])
             ))[:7]  # Top 7
             
+            # Generate appeal analysis
+            appeal_analysis = await self._predict_appeal_probability(
+                case_data, predicted_outcome, confidence_score, similar_cases, judge_insights
+            )
+            
             return PredictionResult(
                 case_id=case_data.case_id,
                 predicted_outcome=CaseOutcome(predicted_outcome),
@@ -396,6 +401,7 @@ class LitigationAnalyticsEngine:
                 risk_factors=risk_factors,
                 success_factors=success_factors,
                 recommendations=recommendations,
+                appeal_analysis=appeal_analysis,
                 prediction_date=datetime.utcnow()
             )
             
