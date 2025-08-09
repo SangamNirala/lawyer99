@@ -151,7 +151,7 @@ def test_appeal_analysis_ai_fallback_fix():
             
             # CRITERION 4: HIGHER CONFIDENCE SCORE (90% vs 65%)
             print("\n4️⃣ CHECKING CONFIDENCE SCORE:")
-            confidence_score = data.get('confidence_score', 0)
+            confidence_score = data.get('appeal_confidence', 0)
             
             if confidence_score >= 0.85:  # 85%+ indicates full AI analysis mode
                 print(f"✅ SUCCESS: High confidence score {confidence_score:.0%} (indicates full AI analysis)")
