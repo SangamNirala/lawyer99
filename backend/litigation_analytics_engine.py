@@ -120,8 +120,35 @@ class LitigationAnalyticsEngine:
     
     def __init__(self, db_connection):
         self.db = db_connection
-        self.gemini_model = genai.GenerativeModel('gemini-pro')
-        self.groq_client = Groq(api_key=os.environ.get('GROQ_API_KEY'))
+        
+        # Initialize AI clients with proper error handling
+        self.gemini_api_key = os.environ.get('GEMINI_API_KEY')
+        self.groq_api_key = os.environ.get('GROQ_API_KEY')
+        
+        # Configure Gemini if API key is available
+        if self.gemini_api_key:
+            try:
+                genai.configure(api_key=self.gemini_api_key)
+                self.gemini_model = genai.GenerativeModel('gemini-pro')
+                logger.info("✅ Gemini AI client initialized successfully")
+            except Exception as e:
+                logger.warning(f"⚠️ Failed to initialize Gemini: {e}")
+                self.gemini_model = None
+        else:
+            logger.warning("⚠️ Gemini API key not available")
+            self.gemini_model = None
+        
+        # Configure Groq if API key is available
+        if self.groq_api_key:
+            try:
+                self.groq_client = Groq(api_key=self.groq_api_key)
+                logger.info("✅ Groq AI client initialized successfully")
+            except Exception as e:
+                logger.warning(f"⚠️ Failed to initialize Groq: {e}")
+                self.groq_client = None
+        else:
+            logger.warning("⚠️ Groq API key not available")
+            self.groq_client = None
         
         # Initialize CourtListener client
         self.courtlistener_client = httpx.AsyncClient(
