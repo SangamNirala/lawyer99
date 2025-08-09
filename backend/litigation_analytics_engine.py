@@ -129,7 +129,7 @@ class LitigationAnalyticsEngine:
         if self.gemini_api_key:
             try:
                 genai.configure(api_key=self.gemini_api_key)
-                self.gemini_model = genai.GenerativeModel('gemini-pro')
+                self.gemini_model = genai.GenerativeModel('gemini-1.5-pro')
                 logger.info("✅ Gemini AI client initialized successfully")
             except Exception as e:
                 logger.warning(f"⚠️ Failed to initialize Gemini: {e}")
