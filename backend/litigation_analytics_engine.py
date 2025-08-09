@@ -1088,34 +1088,60 @@ class LitigationAnalyticsEngine:
         return max(0.10, min(0.70, appeal_success_prob))
 
     def _estimate_appeal_costs(self, case_value: Optional[float], jurisdiction: str) -> float:
-        """Estimate costs of appellate proceedings"""
-        base_appeal_cost = 75000  # Base appellate cost
+        """
+        TASK 3: Enhanced appeal cost estimation model with more reasonable pricing
         
-        # Adjust based on case value
+        Provides more realistic cost estimates that scale appropriately with case value
+        """
+        # More reasonable base costs depending on case value tiers
+        if case_value:
+            if case_value >= 10000000:    # $10M+ cases
+                base_appeal_cost = 150000  # High-stakes, complex appeals
+            elif case_value >= 5000000:   # $5M-$10M cases
+                base_appeal_cost = 100000  # Substantial appeals
+            elif case_value >= 1000000:   # $1M-$5M cases
+                base_appeal_cost = 65000   # Standard complex appeals
+            elif case_value >= 500000:    # $500K-$1M cases
+                base_appeal_cost = 45000   # Moderate appeals
+            elif case_value >= 100000:    # $100K-$500K cases
+                base_appeal_cost = 30000   # Standard appeals
+            else:                         # Under $100K cases
+                base_appeal_cost = 20000   # Simple appeals
+        else:
+            base_appeal_cost = 40000  # Default for unknown case value
+        
+        # More moderate value-based multipliers (reduced impact)
+        value_multiplier = 1.0
         if case_value:
             if case_value >= 10000000:
-                value_multiplier = 2.5
+                value_multiplier = 1.3    # Reduced from 2.5
             elif case_value >= 5000000:
-                value_multiplier = 2.0
+                value_multiplier = 1.2    # Reduced from 2.0
             elif case_value >= 1000000:
-                value_multiplier = 1.5
+                value_multiplier = 1.1    # Reduced from 1.5
             else:
                 value_multiplier = 1.0
-        else:
-            value_multiplier = 1.0
         
-        # Jurisdiction cost adjustments
+        # Jurisdiction cost adjustments (slightly reduced)
         jurisdiction_multipliers = {
-            "federal": 1.3,      # Higher federal appellate costs
-            "california": 1.4,   # High California costs
-            "new_york": 1.5,     # Highest costs in NY
-            "delaware": 1.2,     # Moderate Delaware costs
-            "texas": 0.9,        # Lower Texas costs
+            "federal": 1.2,      # Reduced from 1.3
+            "california": 1.25,  # Reduced from 1.4
+            "new_york": 1.3,     # Reduced from 1.5
+            "delaware": 1.15,    # Reduced from 1.2
+            "texas": 0.95,       # Slightly increased from 0.9
+            "florida": 1.0,      # Average costs
+            "illinois": 1.1,     # Moderate costs
         }
         
         jurisdiction_multiplier = jurisdiction_multipliers.get(jurisdiction.lower(), 1.0)
         
-        return base_appeal_cost * value_multiplier * jurisdiction_multiplier
+        final_cost = base_appeal_cost * value_multiplier * jurisdiction_multiplier
+        
+        # Ensure costs don't exceed reasonable percentage of case value
+        if case_value and final_cost > (case_value * 0.25):  # Cap at 25% of case value
+            final_cost = case_value * 0.25
+        
+        return final_cost
 
     def _estimate_appeal_timeline(self, jurisdiction: str, court_level: str) -> int:
         """Estimate timeline to file appeal (days from judgment)"""
