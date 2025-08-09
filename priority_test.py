@@ -4,7 +4,7 @@ import random
 
 def test_attorney_creation():
     """Test attorney creation with proper enum handling"""
-    base_url = "https://d99b15f3-45f4-403b-8b1f-293225e20e3e.preview.emergentagent.com"
+    base_url = "https://cad694cf-d3ea-4711-9a72-668a6a40e52f.preview.emergentagent.com"
     api_url = f"{base_url}/api"
     
     attorney_data = {
@@ -38,7 +38,7 @@ def test_attorney_creation():
 
 def test_compliant_contract_generation():
     """Test compliant contract generation"""
-    base_url = "https://d99b15f3-45f4-403b-8b1f-293225e20e3e.preview.emergentagent.com"
+    base_url = "https://cad694cf-d3ea-4711-9a72-668a6a40e52f.preview.emergentagent.com"
     api_url = f"{base_url}/api"
     
     contract_data = {

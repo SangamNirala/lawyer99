@@ -11,7 +11,7 @@ import sys
 from datetime import datetime
 
 class PDFTitleFixTester:
-    def __init__(self, base_url="https://d99b15f3-45f4-403b-8b1f-293225e20e3e.preview.emergentagent.com"):
+    def __init__(self, base_url="https://cad694cf-d3ea-4711-9a72-668a6a40e52f.preview.emergentagent.com"):
         self.base_url = base_url
         self.api_url = f"{base_url}/api"
         self.tests_run = 0
