@@ -407,12 +407,24 @@ class LitigationAnalyticsEngine:
             
         except Exception as e:
             logger.error(f"❌ Ensemble prediction failed: {e}")
-            # Return default prediction
+            # Return default prediction with basic appeal analysis
+            default_appeal = AppealAnalysis(
+                appeal_probability=0.3,  # Default 30% appeal probability
+                appeal_confidence=0.5,
+                appeal_factors=["Insufficient data for detailed appeal analysis"],
+                appeal_timeline=30,
+                appeal_cost_estimate=25000,
+                appeal_success_probability=0.4,
+                preventive_measures=["Ensure thorough trial record preparation"],
+                jurisdictional_appeal_rate=0.25
+            )
+            
             return PredictionResult(
                 case_id=case_data.case_id,
                 predicted_outcome=CaseOutcome.ONGOING,
                 confidence_score=0.5,
-                probability_breakdown={"plaintiff_win": 0.25, "defendant_win": 0.25, "settlement": 0.25, "dismissed": 0.25}
+                probability_breakdown={"plaintiff_win": 0.25, "defendant_win": 0.25, "settlement": 0.25, "dismissed": 0.25},
+                appeal_analysis=default_appeal
             )
 
     def _parse_ai_analysis(self, analysis_text: str, source: str) -> Dict[str, Any]:
