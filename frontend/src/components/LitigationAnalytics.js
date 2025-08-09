@@ -417,6 +417,110 @@ const CaseOutcomePredictor = ({ onPredictionComplete }) => {
               </div>
             </div>
 
+            {/* Appeal Analysis */}
+            {prediction.appeal_analysis && (
+              <div>
+                <h3 className="text-lg font-semibold mb-3 text-orange-700 flex items-center">
+                  <Scale className="h-4 w-4 mr-2" />
+                  Appeal Risk Analysis
+                </h3>
+                
+                {/* Appeal Probability Display */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  <div className="text-center p-4 bg-orange-50 rounded-lg">
+                    <div className="text-2xl font-bold text-orange-900">
+                      {(prediction.appeal_analysis.appeal_probability * 100).toFixed(1)}%
+                    </div>
+                    <div className="text-sm text-orange-600">Appeal Probability</div>
+                    <Progress value={prediction.appeal_analysis.appeal_probability * 100} className="mt-2 h-2" />
+                  </div>
+
+                  <div className="text-center p-4 bg-amber-50 rounded-lg">
+                    <div className="text-2xl font-bold text-amber-900">
+                      {(prediction.appeal_analysis.appeal_success_probability * 100).toFixed(1)}%
+                    </div>
+                    <div className="text-sm text-amber-600">Success if Appealed</div>
+                    <Progress value={prediction.appeal_analysis.appeal_success_probability * 100} className="mt-2 h-2" />
+                  </div>
+
+                  <div className="text-center p-4 bg-red-50 rounded-lg">
+                    <Clock className="h-6 w-6 text-red-600 mx-auto mb-2" />
+                    <div className="text-2xl font-bold text-red-900">
+                      {prediction.appeal_analysis.appeal_timeline || 30} days
+                    </div>
+                    <div className="text-sm text-red-600">Appeal Deadline</div>
+                  </div>
+                </div>
+
+                {/* Appeal Cost & Jurisdictional Comparison */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div className="p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-center mb-2">
+                      <DollarSign className="h-4 w-4 text-gray-600 mr-2" />
+                      <span className="font-semibold text-gray-700">Estimated Appeal Cost</span>
+                    </div>
+                    <div className="text-xl font-bold text-gray-900">
+                      ${prediction.appeal_analysis.appeal_cost_estimate?.toLocaleString() || 'N/A'}
+                    </div>
+                  </div>
+
+                  <div className="p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-center mb-2">
+                      <BarChart3 className="h-4 w-4 text-gray-600 mr-2" />
+                      <span className="font-semibold text-gray-700">Jurisdictional Average</span>
+                    </div>
+                    <div className="text-xl font-bold text-gray-900">
+                      {(prediction.appeal_analysis.jurisdictional_appeal_rate * 100).toFixed(1)}%
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      Your case: {prediction.appeal_analysis.appeal_probability > prediction.appeal_analysis.jurisdictional_appeal_rate ? 'Higher' : 'Lower'} risk
+                    </div>
+                  </div>
+                </div>
+
+                {/* Appeal Factors & Preventive Measures */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="font-semibold mb-2 text-red-700 flex items-center">
+                      <AlertTriangle className="h-4 w-4 mr-2" />
+                      Appeal Risk Factors
+                    </h4>
+                    {prediction.appeal_analysis.appeal_factors && prediction.appeal_analysis.appeal_factors.length > 0 ? (
+                      <ul className="space-y-1">
+                        {prediction.appeal_analysis.appeal_factors.map((factor, index) => (
+                          <li key={index} className="text-sm text-red-600 flex items-start">
+                            <span className="text-red-400 mr-2">•</span>
+                            {factor}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-sm text-gray-500">Analyzing appeal factors...</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold mb-2 text-green-700 flex items-center">
+                      <Shield className="h-4 w-4 mr-2" />
+                      Preventive Measures
+                    </h4>
+                    {prediction.appeal_analysis.preventive_measures && prediction.appeal_analysis.preventive_measures.length > 0 ? (
+                      <ul className="space-y-1">
+                        {prediction.appeal_analysis.preventive_measures.map((measure, index) => (
+                          <li key={index} className="text-sm text-green-600 flex items-start">
+                            <span className="text-green-400 mr-2">→</span>
+                            {measure}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-sm text-gray-500">Generating preventive strategies...</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Recommendations */}
             {prediction.recommendations && prediction.recommendations.length > 0 && (
               <div>
