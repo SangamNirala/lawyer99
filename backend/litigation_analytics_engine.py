@@ -726,6 +726,11 @@ class LitigationAnalyticsEngine:
             ai_analysis_mode = ai_appeal_analysis.get("ai_analysis_mode", "fallback_default")
             appeal_confidence = 0.90 if ai_analysis_mode == "full_ai_analysis" else 0.65  # Higher confidence with AI analysis
             
+            # TASK 2: Add AI-powered case facts analysis for evidence/complexity correlation
+            case_facts_analysis = None
+            if case_data.case_facts:
+                case_facts_analysis = await self._analyze_case_facts_ai(case_data.case_facts, case_data.case_type)
+            
             logger.info(f"✅ Appeal analysis complete. Mode: {ai_analysis_mode}, Confidence: {appeal_confidence:.0%}")
             
             return AppealAnalysis(
@@ -740,7 +745,8 @@ class LitigationAnalyticsEngine:
                 preventive_measures=ai_appeal_analysis.get("preventive_measures", 
                     self._generate_default_preventive_measures(case_data, predicted_outcome)
                 )[:5],
-                jurisdictional_appeal_rate=jurisdictional_rate
+                jurisdictional_appeal_rate=jurisdictional_rate,
+                case_facts_analysis=case_facts_analysis  # TASK 2: Include AI-suggested evidence/complexity
             )
             
         except Exception as e:
