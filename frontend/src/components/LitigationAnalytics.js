@@ -1687,7 +1687,7 @@ const AppealAnalysis = () => {
                   {(appealAnalysis.jurisdictional_appeal_rate * 100).toFixed(1)}%
                 </div>
                 <div className="text-sm text-gray-600">
-                  Your case risk is {appealAnalysis.appeal_probability > appealAnalysis.jurisdictional_appeal_rate ? 'above' : 'below'} average
+                  Your case filing risk: {appealAnalysis.appeal_probability > appealAnalysis.jurisdictional_appeal_rate ? 'Higher' : 'Lower'} than average
                 </div>
               </div>
 
