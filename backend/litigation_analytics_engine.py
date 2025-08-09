@@ -566,14 +566,14 @@ class LitigationAnalyticsEngine:
     def _get_evidence_appeal_multiplier(self, evidence_strength: Optional[float]) -> float:
         """Get appeal probability multiplier based on evidence strength (inverse relationship)"""
         if not evidence_strength:
-            return 1.2
+            return 1.1  # Reduced from 1.2
         
         # Normalize to 0-1 scale if needed
         if evidence_strength > 1:
             evidence_strength = evidence_strength / 10.0
         
-        # Inverse relationship: weak evidence = higher appeal probability
-        return 1.0 + (0.8 * (1.0 - evidence_strength))
+        # Inverse relationship: weak evidence = higher appeal probability (reduced impact)
+        return 1.0 + (0.5 * (1.0 - evidence_strength))  # Reduced from 0.8 to 0.5
 
     def _get_jurisdiction_appeal_multiplier(self, jurisdiction: str) -> float:
         """Get appeal probability multiplier based on jurisdiction appeal patterns"""
