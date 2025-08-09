@@ -194,16 +194,20 @@ class LitigationAnalyticsEngine:
         try:
             logger.info(f"🔍 Analyzing case outcome for case {case_data.case_id}")
             
+            # TASK 2: Enhance evidence strength and complexity correlation with case narrative
+            # Extract and correlate evidence/complexity from case facts if provided
+            enhanced_case_data = await self._enhance_case_parameters_from_narrative(case_data)
+            
             # Get similar historical cases
-            similar_cases = await self._find_similar_cases(case_data)
+            similar_cases = await self._find_similar_cases(enhanced_case_data)
             
             # Get judicial insights if judge is known
             judge_insights = None
-            if case_data.judge_name:
-                judge_insights = await self._get_judge_insights(case_data.judge_name)
+            if enhanced_case_data.judge_name:
+                judge_insights = await self._get_judge_insights(enhanced_case_data.judge_name)
             
             # Prepare AI analysis prompt
-            analysis_prompt = self._build_case_analysis_prompt(case_data, similar_cases, judge_insights)
+            analysis_prompt = self._build_case_analysis_prompt(enhanced_case_data, similar_cases, judge_insights)
             
             # Run parallel AI analysis
             gemini_analysis, groq_analysis = await asyncio.gather(
@@ -213,7 +217,7 @@ class LitigationAnalyticsEngine:
             
             # Combine and validate results
             prediction_result = await self._ensemble_prediction(
-                case_data, gemini_analysis, groq_analysis, similar_cases, judge_insights
+                enhanced_case_data, gemini_analysis, groq_analysis, similar_cases, judge_insights
             )
             
             # Store prediction for future accuracy tracking
