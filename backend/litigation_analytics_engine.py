@@ -230,6 +230,187 @@ class LitigationAnalyticsEngine:
             logger.error(f"❌ Case outcome analysis failed: {e}")
             raise
 
+    async def _enhance_case_parameters_from_narrative(self, case_data: CaseData) -> CaseData:
+        """
+        TASK 2: Enhance evidence strength and complexity correlation with case narrative
+        
+        Uses AI to extract and correlate evidence strength and complexity from case facts,
+        making the sliders more intelligent and auto-adjusting based on case narrative.
+        """
+        try:
+            # If case facts are not provided or parameters are already well-defined, return as-is
+            if not case_data.case_facts or not case_data.case_facts.strip():
+                logger.info("📝 No case facts provided - using provided parameters as-is")
+                return case_data
+                
+            logger.info("🧠 Analyzing case narrative to enhance evidence strength and complexity parameters...")
+            
+            # Build AI prompt for parameter extraction
+            extraction_prompt = f"""
+            LEGAL CASE PARAMETER EXTRACTION AND CORRELATION
+
+            CASE NARRATIVE:
+            {case_data.case_facts}
+
+            CASE CONTEXT:
+            - Case Type: {case_data.case_type.value.replace('_', ' ').title()}
+            - Case Value: {f'${case_data.case_value:,.2f}' if case_data.case_value else 'Not specified'}
+            - Jurisdiction: {case_data.jurisdiction.replace('_', ' ').title()}
+            - Current Evidence Strength (if provided): {case_data.evidence_strength or 'Not specified'}/10
+            - Current Complexity (if provided): {f'{case_data.case_complexity*100:.0f}%' if case_data.case_complexity else 'Not specified'}
+
+            ANALYSIS REQUIRED:
+            Based on the case narrative above, provide intelligent assessment of:
+
+            1. **EVIDENCE STRENGTH ANALYSIS (0-10 scale)**:
+               - Evaluate strength of documentation, contracts, witnesses, physical evidence
+               - Consider clarity of liability, causation, and damages
+               - Assess credibility and admissibility of evidence
+               - Factor in expert testimony potential and documentary proof
+
+            2. **CASE COMPLEXITY ANALYSIS (0-100% scale)**:
+               - Evaluate legal complexity (multiple claims, novel issues, precedent clarity)
+               - Assess factual complexity (number of parties, timeline, technical issues)
+               - Consider procedural complexity (jurisdiction issues, discovery scope)
+               - Factor in expert witness requirements and document volume
+
+            CORRELATION REQUIREMENTS:
+            - If user provided parameters, explain how narrative supports or suggests adjustment
+            - Provide specific reasons from the case facts for your assessment
+            - Consider realistic expectations for this type of case and jurisdiction
+
+            FORMAT YOUR RESPONSE AS:
+            EVIDENCE_STRENGTH: [number 0-10]
+            EVIDENCE_REASONING: [2-3 specific points from case facts]
+            COMPLEXITY_SCORE: [number 0-100]
+            COMPLEXITY_REASONING: [2-3 specific points from case facts]
+            NARRATIVE_CORRELATION: [how well current parameters align with case facts]
+            """
+            
+            # Get AI analysis for parameter extraction
+            ai_enhanced_params = await self._get_parameter_extraction_analysis(extraction_prompt)
+            
+            # Create enhanced case data with AI-derived parameters
+            enhanced_case_data = CaseData(
+                case_id=case_data.case_id,
+                case_type=case_data.case_type,
+                jurisdiction=case_data.jurisdiction,
+                court_level=case_data.court_level,
+                judge_name=case_data.judge_name,
+                case_facts=case_data.case_facts,
+                legal_issues=case_data.legal_issues,
+                case_complexity=ai_enhanced_params.get('complexity_score', case_data.case_complexity),
+                case_value=case_data.case_value,
+                filing_date=case_data.filing_date,
+                case_status=case_data.case_status,
+                similar_cases=case_data.similar_cases,
+                evidence_strength=ai_enhanced_params.get('evidence_strength', case_data.evidence_strength),
+                witness_count=case_data.witness_count,
+                settlement_offers=case_data.settlement_offers
+            )
+            
+            logger.info(f"✅ Enhanced parameters: Evidence {enhanced_case_data.evidence_strength}/10, Complexity {enhanced_case_data.case_complexity*100:.0f}%")
+            return enhanced_case_data
+            
+        except Exception as e:
+            logger.warning(f"⚠️ Parameter enhancement failed: {e} - using original parameters")
+            return case_data
+
+    async def _get_parameter_extraction_analysis(self, prompt: str) -> Dict[str, Any]:
+        """Get AI analysis for evidence strength and complexity extraction"""
+        try:
+            # Try Gemini first
+            if hasattr(self, 'gemini_model') and self.gemini_model:
+                try:
+                    logger.info("🚀 Using Gemini for parameter extraction...")
+                    gemini_response = await asyncio.to_thread(
+                        self.gemini_model.generate_content, 
+                        prompt
+                    )
+                    
+                    if gemini_response and gemini_response.text:
+                        return self._parse_parameter_extraction_response(gemini_response.text)
+                        
+                except Exception as e:
+                    logger.warning(f"⚠️ Gemini parameter extraction failed: {e}")
+            
+            # Try Groq as fallback
+            if hasattr(self, 'groq_client') and self.groq_client:
+                try:
+                    logger.info("🚀 Using Groq for parameter extraction...")
+                    groq_response = await asyncio.to_thread(
+                        self.groq_client.chat.completions.create,
+                        model="mixtral-8x7b-32768",
+                        messages=[{"role": "user", "content": prompt}],
+                        temperature=0.1,
+                        max_tokens=800
+                    )
+                    
+                    if groq_response and groq_response.choices[0].message.content:
+                        return self._parse_parameter_extraction_response(groq_response.choices[0].message.content)
+                        
+                except Exception as e:
+                    logger.warning(f"⚠️ Groq parameter extraction failed: {e}")
+            
+            # Return default values if AI services fail
+            logger.warning("⚠️ All AI services failed for parameter extraction - using defaults")
+            return {}
+            
+        except Exception as e:
+            logger.error(f"❌ Parameter extraction analysis failed: {e}")
+            return {}
+
+    def _parse_parameter_extraction_response(self, response_text: str) -> Dict[str, Any]:
+        """Parse AI response to extract evidence strength and complexity parameters"""
+        try:
+            import re
+            
+            # Extract evidence strength (0-10)
+            evidence_match = re.search(r'EVIDENCE_STRENGTH:\s*(\d+(?:\.\d+)?)', response_text, re.IGNORECASE)
+            evidence_strength = None
+            if evidence_match:
+                evidence_strength = float(evidence_match.group(1))
+                # Ensure it's in valid range
+                evidence_strength = max(0, min(10, evidence_strength))
+            
+            # Extract complexity score (0-100, convert to 0-1 scale)
+            complexity_match = re.search(r'COMPLEXITY_SCORE:\s*(\d+(?:\.\d+)?)', response_text, re.IGNORECASE)
+            complexity_score = None
+            if complexity_match:
+                complexity_score = float(complexity_match.group(1))
+                # Ensure it's in valid range and convert to 0-1 scale
+                complexity_score = max(0, min(100, complexity_score)) / 100.0
+            
+            # Extract reasoning (for logging)
+            evidence_reasoning = ""
+            complexity_reasoning = ""
+            
+            evidence_reasoning_match = re.search(r'EVIDENCE_REASONING:\s*([^\n]+(?:\n[^\n]+)*?)(?=\n[A-Z_]+:|$)', response_text, re.IGNORECASE | re.DOTALL)
+            if evidence_reasoning_match:
+                evidence_reasoning = evidence_reasoning_match.group(1).strip()
+            
+            complexity_reasoning_match = re.search(r'COMPLEXITY_REASONING:\s*([^\n]+(?:\n[^\n]+)*?)(?=\n[A-Z_]+:|$)', response_text, re.IGNORECASE | re.DOTALL)
+            if complexity_reasoning_match:
+                complexity_reasoning = complexity_reasoning_match.group(1).strip()
+            
+            logger.info(f"📊 AI Parameter Extraction - Evidence: {evidence_strength}/10, Complexity: {complexity_score*100 if complexity_score else 0:.0f}%")
+            if evidence_reasoning:
+                logger.info(f"🔍 Evidence Reasoning: {evidence_reasoning[:200]}...")
+            if complexity_reasoning:
+                logger.info(f"🧩 Complexity Reasoning: {complexity_reasoning[:200]}...")
+            
+            result = {}
+            if evidence_strength is not None:
+                result['evidence_strength'] = evidence_strength
+            if complexity_score is not None:
+                result['complexity_score'] = complexity_score
+                
+            return result
+            
+        except Exception as e:
+            logger.error(f"❌ Failed to parse parameter extraction response: {e}")
+            return {}
+
     async def _find_similar_cases(self, case_data: CaseData, limit: int = 10) -> List[Dict[str, Any]]:
         """Find similar historical cases for pattern analysis"""
         try:
