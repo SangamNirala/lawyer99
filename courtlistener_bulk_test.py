@@ -5,7 +5,7 @@ import time
 from datetime import datetime
 
 class CourtListenerBulkTester:
-    def __init__(self, base_url="https://b2e17d7f-d715-45b1-acd0-e51dd70d439b.preview.emergentagent.com"):
+    def __init__(self, base_url="https://b3d0e54e-8004-47d5-83bd-25e76a95a599.preview.emergentagent.com"):
         self.base_url = base_url
         self.api_url = f"{base_url}/api"
         self.tests_run = 0
