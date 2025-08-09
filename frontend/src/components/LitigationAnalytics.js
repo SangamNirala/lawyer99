@@ -1665,12 +1665,12 @@ const AppealAnalysis = () => {
                   </div>
                   <div className="mt-2 text-sm">
                     {appealAnalysis.appeal_probability < 0.25 
-                      ? "Low appeal probability based on case factors. Minimal preventive measures needed."
+                      ? "Low likelihood of appeal being filed based on case factors. Minimal preventive measures needed."
                       : appealAnalysis.appeal_probability < 0.50
-                      ? "Moderate appeal risk. Consider implementing recommended preventive measures."
+                      ? "Moderate likelihood of appeal being filed. Consider implementing recommended preventive measures."
                       : appealAnalysis.appeal_probability < 0.75
-                      ? "High appeal probability. Strong preventive measures and careful trial preparation essential."
-                      : "Very high appeal probability. Immediate strategic review and comprehensive preventive measures critical."}
+                      ? "High likelihood of appeal being filed. Strong preventive measures and careful trial preparation essential."
+                      : "Very high likelihood of appeal being filed. Immediate strategic review and comprehensive preventive measures critical."}
                   </div>
                 </div>
               );
