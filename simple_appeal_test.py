@@ -1,174 +1,108 @@
 #!/usr/bin/env python3
-"""
-Simple Appeal Analysis Test - Quick verification of metrics clarification fix
-"""
 
 import requests
 import json
-import sys
-from datetime import datetime
 
-# Backend URL
-API_BASE_URL = "https://b3d0e54e-8004-47d5-83bd-25e76a95a599.preview.emergentagent.com/api"
+# Test the user's exact scenario
+user_case = {
+    "case_type": "civil",
+    "jurisdiction": "federal", 
+    "case_value": 250000,
+    "judge_name": "Judge Rebecca Morgan",
+    "evidence_strength": 7.0,
+    "case_complexity": 0.65,
+    "case_facts": "Plaintiff alleges breach of contract by a federal contractor involving delayed delivery of critical medical equipment. The agreement stipulated delivery within 30 days, but actual delivery occurred after 90 days, causing significant financial loss to the plaintiff's hospital operations. Defendant claims delays were due to unforeseen supply chain disruptions caused by international shipping restrictions. Evidence includes signed contracts, delivery logs, and email correspondence between parties."
+}
 
-def test_appeal_analysis_quick():
-    """Quick test of appeal analysis endpoint"""
-    print("🎯 QUICK APPEAL ANALYSIS TEST")
-    print("=" * 50)
-    
-    # User's exact scenario from review request
-    test_data = {
-        "case_type": "civil",
-        "jurisdiction": "federal",
-        "case_value": 250000,
-        "judge_name": "Judge Rebecca Morgan",
-        "evidence_strength": 7.0,
-        "case_complexity": 0.65,
-        "case_facts": "Plaintiff alleges breach of contract by federal contractor involving delayed delivery of critical medical equipment. Agreement stipulated delivery within 30 days, but actual delivery occurred after 90 days, causing significant financial loss to plaintiff's hospital operations. Defendant claims delays were due to unforeseen supply chain disruptions caused by international shipping restrictions. Evidence includes signed contracts, delivery logs, and email correspondence between parties."
-    }
-    
-    print(f"📋 Testing with user's exact scenario:")
-    print(f"   Case Type: {test_data['case_type']}")
-    print(f"   Jurisdiction: {test_data['jurisdiction']}")
-    print(f"   Case Value: ${test_data['case_value']:,}")
-    print(f"   Judge: {test_data['judge_name']}")
-    print(f"   Evidence Strength: {test_data['evidence_strength']}/10")
-    print(f"   Case Complexity: {test_data['case_complexity']:.0%}")
-    
-    try:
-        print(f"\n🔗 Making request to: {API_BASE_URL}/litigation/appeal-analysis")
-        print("⏳ Processing... (this may take 30-60 seconds)")
-        
-        response = requests.post(
-            f"{API_BASE_URL}/litigation/appeal-analysis",
-            json=test_data,
-            timeout=90  # Extended timeout for AI processing
-        )
-        
-        print(f"📊 Response Status: {response.status_code}")
-        
-        if response.status_code == 200:
-            data = response.json()
-            
-            # Extract the two key metrics
-            appeal_probability = data.get('appeal_probability', 0)
-            appeal_success_probability = data.get('appeal_success_probability', 0)
-            appeal_confidence = data.get('appeal_confidence', 0)
-            
-            print("\n✅ SUCCESS - Appeal Analysis Working!")
-            print("=" * 50)
-            print("🎯 METRICS CLARIFICATION VERIFICATION:")
-            print(f"   📈 Appeal Filing Probability: {appeal_probability:.1%}")
-            print(f"      (Likelihood that losing party will file an appeal)")
-            print(f"   🏆 Appeal Success Probability: {appeal_success_probability:.1%}")
-            print(f"      (Likelihood of winning if appeal is filed)")
-            print(f"   🎯 Analysis Confidence: {appeal_confidence:.1%}")
-            
-            # Verify metrics separation
-            if appeal_probability != appeal_success_probability:
-                print("\n✅ METRICS SEPARATION WORKING:")
-                print("   Both metrics are different values, representing separate aspects")
-                print("   - Filing probability: Risk of appeal being filed")
-                print("   - Success probability: Chance of winning if filed")
-            else:
-                print("\n⚠️  METRICS SEPARATION ISSUE:")
-                print("   Both metrics have identical values - should be different")
-            
-            # Check for expected ranges based on case details
-            print(f"\n📊 ANALYSIS QUALITY:")
-            if appeal_confidence >= 0.85:
-                print("   ✅ High confidence (85%+) - Full AI analysis mode")
-            elif appeal_confidence >= 0.65:
-                print("   ⚠️  Moderate confidence (65-84%) - Partial AI analysis")
-            else:
-                print("   ❌ Low confidence (<65%) - Fallback mode")
-            
-            # Check other required fields
-            required_fields = [
-                'appeal_factors', 'appeal_timeline', 'appeal_cost_estimate',
-                'preventive_measures', 'jurisdictional_appeal_rate'
-            ]
-            
-            missing_fields = [field for field in required_fields if field not in data]
-            if not missing_fields:
-                print("   ✅ All required fields present")
-            else:
-                print(f"   ❌ Missing fields: {missing_fields}")
-            
-            # Display additional details
-            appeal_factors = data.get('appeal_factors', [])
-            preventive_measures = data.get('preventive_measures', [])
-            
-            print(f"\n📋 ADDITIONAL DETAILS:")
-            print(f"   Appeal Factors: {len(appeal_factors)} identified")
-            print(f"   Preventive Measures: {len(preventive_measures)} suggested")
-            
-            if data.get('appeal_cost_estimate'):
-                print(f"   Estimated Appeal Cost: ${data['appeal_cost_estimate']:,.0f}")
-            
-            if data.get('appeal_timeline'):
-                print(f"   Appeal Timeline: {data['appeal_timeline']} days")
-            
-            return True
-            
-        elif response.status_code == 503:
-            print("❌ SERVICE UNAVAILABLE (503)")
-            print("   Litigation Analytics Engine may not be loaded")
-            return False
-            
-        elif response.status_code == 500:
-            print("❌ INTERNAL SERVER ERROR (500)")
-            try:
-                error_data = response.json()
-                print(f"   Error: {error_data.get('detail', 'Unknown error')}")
-            except:
-                print(f"   Raw error: {response.text}")
-            return False
-            
-        else:
-            print(f"❌ UNEXPECTED STATUS CODE: {response.status_code}")
-            print(f"   Response: {response.text}")
-            return False
-            
-    except requests.exceptions.Timeout:
-        print("❌ REQUEST TIMEOUT")
-        print("   The AI analysis is taking too long (>90 seconds)")
-        print("   This may indicate performance issues with the AI processing")
-        return False
-        
-    except Exception as e:
-        print(f"❌ EXCEPTION: {str(e)}")
-        return False
+url = "https://b3d0e54e-8004-47d5-83bd-25e76a95a599.preview.emergentagent.com/api/litigation/appeal-analysis"
+response = requests.post(url, json=user_case, timeout=120)
 
-def main():
-    print("🎯 APPEAL PROBABILITY ANALYSIS - METRICS CLARIFICATION FIX TEST")
-    print("=" * 70)
-    print(f"⏰ Test started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    print(f"🔗 Backend URL: {API_BASE_URL}")
+print("🎯 APPEAL ANALYSIS TASK 2 & TASK 3 TESTING RESULTS")
+print("=" * 80)
+print(f"Status Code: {response.status_code}")
+
+if response.status_code == 200:
+    data = response.json()
+    print("✅ SUCCESS: Appeal analysis endpoint working")
     print()
     
-    success = test_appeal_analysis_quick()
+    # TASK 2 Analysis
+    print("🔍 TASK 2: Evidence/Complexity AI Correlation")
+    print("-" * 50)
     
-    print("\n" + "=" * 70)
-    print("🎯 TEST SUMMARY")
-    print("=" * 70)
-    
-    if success:
-        print("🎉 APPEAL ANALYSIS METRICS CLARIFICATION FIX - SUCCESS!")
-        print("✅ Both appeal filing and success probabilities are working")
-        print("✅ Metrics separation is functioning correctly")
-        print("✅ User's reported confusion should be resolved")
-        print("\n📋 READY FOR PRODUCTION USE")
+    case_facts_analysis = data.get("case_facts_analysis")
+    if case_facts_analysis:
+        print("✅ case_facts_analysis field is present")
+        print(f"📊 Full Analysis: {json.dumps(case_facts_analysis, indent=2)}")
+        
+        ai_evidence = case_facts_analysis.get("evidence_strength_suggested")
+        ai_complexity = case_facts_analysis.get("case_complexity_suggested")
+        
+        if ai_evidence is not None:
+            print(f"📊 AI Suggested Evidence: {ai_evidence}/10 (User input: 7.0/10)")
+            if 6.0 <= ai_evidence <= 8.0:
+                print("✅ Evidence suggestion in expected range (6-8/10)")
+            else:
+                print(f"❌ Evidence suggestion {ai_evidence}/10 outside expected range")
+        
+        if ai_complexity is not None:
+            complexity_pct = ai_complexity * 100 if ai_complexity <= 1 else ai_complexity
+            print(f"📊 AI Suggested Complexity: {complexity_pct}% (User input: 65%)")
+            if 50 <= complexity_pct <= 70:
+                print("✅ Complexity suggestion in expected range (50-70%)")
+            else:
+                print(f"❌ Complexity suggestion {complexity_pct}% outside expected range")
+        
+        print(f"📝 Evidence Reasoning: {case_facts_analysis.get('evidence_reasoning', 'Missing')}")
+        print(f"📝 Complexity Reasoning: {case_facts_analysis.get('complexity_reasoning', 'Missing')}")
     else:
-        print("❌ APPEAL ANALYSIS METRICS CLARIFICATION FIX - ISSUES FOUND")
-        print("❌ The endpoint is not working as expected")
-        print("❌ User's reported issues may not be resolved")
-        print("\n🔧 REQUIRES FURTHER INVESTIGATION")
+        print("❌ case_facts_analysis field is MISSING")
     
-    print(f"⏰ Test completed at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print()
     
-    return success
-
-if __name__ == "__main__":
-    success = main()
-    sys.exit(0 if success else 1)
+    # TASK 3 Analysis
+    print("💰 TASK 3: Enhanced Cost Estimation")
+    print("-" * 50)
+    
+    appeal_cost = data.get("appeal_cost_estimate", 0)
+    case_value = 250000
+    
+    print(f"📊 Case Value: ${case_value:,}")
+    print(f"📊 Appeal Cost: ${appeal_cost:,.2f}")
+    
+    if appeal_cost > 0:
+        cost_pct = (appeal_cost / case_value) * 100
+        expected_cost = case_value * 0.11  # 11%
+        max_cost = case_value * 0.18  # 18%
+        
+        print(f"📊 Cost Percentage: {cost_pct:.1f}%")
+        print(f"📊 Expected (~11%): ${expected_cost:,.2f}")
+        print(f"📊 Maximum (18%): ${max_cost:,.2f}")
+        
+        if abs(appeal_cost - expected_cost) <= (expected_cost * 0.5):
+            print("✅ Cost is reasonable (~11% of case value)")
+        else:
+            print(f"❌ Cost not close to expected 11%")
+        
+        if appeal_cost <= max_cost:
+            print("✅ Cost does not exceed 18% maximum")
+        else:
+            print(f"❌ Cost exceeds 18% maximum")
+        
+        if appeal_cost < 97500:
+            improvement = ((97500 - appeal_cost) / 97500) * 100
+            print(f"✅ Cost improved by {improvement:.1f}% from previous $97,500")
+        else:
+            print("❌ Cost not improved from previous estimate")
+    else:
+        print("❌ No appeal cost estimate provided")
+    
+    print()
+    print("📊 OTHER KEY METRICS:")
+    print(f"   Appeal Probability: {data.get('appeal_probability', 0):.1%}")
+    print(f"   Appeal Success Probability: {data.get('appeal_success_probability', 0):.1%}")
+    print(f"   Appeal Timeline: {data.get('appeal_timeline', 0)} days")
+    
+else:
+    print(f"❌ Request failed: {response.status_code}")
+    print(f"Response: {response.text}")
