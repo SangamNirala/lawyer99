@@ -43,7 +43,7 @@ def test_appeal_analysis_evidence_complexity_correlation():
     
     # Exact test case from the review request
     test_case = {
-        "case_type": "Civil",
+        "case_type": "civil",
         "jurisdiction": "Federal", 
         "case_value": 250000,
         "judge_name": "Judge Rebecca Morgan",
