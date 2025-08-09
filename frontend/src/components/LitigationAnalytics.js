@@ -1623,7 +1623,7 @@ const AppealAnalysis = () => {
                 <div className="text-2xl font-bold text-orange-900">
                   {(appealAnalysis.appeal_probability * 100).toFixed(1)}%
                 </div>
-                <div className="text-sm text-orange-600">Appeal Probability</div>
+                <div className="text-sm text-orange-600">Likelihood of Appeal Being Filed</div>
                 <Progress value={appealAnalysis.appeal_probability * 100} className="mt-2 h-2" />
               </div>
 
