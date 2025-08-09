@@ -501,23 +501,15 @@ class LitigationAnalyticsEngine:
             return AppealAnalysis(
                 appeal_probability=appeal_probability,
                 appeal_confidence=0.85,  # High confidence in appeal prediction
-                appeal_factors=ai_appeal_analysis.get("appeal_factors", [
-                    f"Case outcome: {predicted_outcome.replace('_', ' ').title()}",
-                    f"Case value: ${case_data.case_value:,.0f}" if case_data.case_value else "Case value: Not specified",
-                    f"Evidence strength: {case_data.evidence_strength}/10" if case_data.evidence_strength else "Evidence strength: Not rated",
-                    f"Jurisdiction: {case_data.jurisdiction.title()}",
-                    f"Case complexity: {case_data.case_complexity*100:.0f}%" if case_data.case_complexity else "Case complexity: Not specified"
-                ])[:5],
+                appeal_factors=ai_appeal_analysis.get("appeal_factors", 
+                    self._generate_default_appeal_factors(case_data, predicted_outcome, appeal_probability)
+                )[:5],
                 appeal_timeline=appeal_timeline,
                 appeal_cost_estimate=appeal_cost,
                 appeal_success_probability=appeal_success_prob,
-                preventive_measures=ai_appeal_analysis.get("preventive_measures", [
-                    "Ensure comprehensive trial record with detailed objections",
-                    "Prepare strong post-trial motions to address potential appeal grounds",
-                    "Document all legal arguments and authorities thoroughly",
-                    "Consider settlement negotiations to avoid appeal risk",
-                    "Retain experienced appellate counsel for consultation"
-                ])[:5],
+                preventive_measures=ai_appeal_analysis.get("preventive_measures", 
+                    self._generate_default_preventive_measures(case_data, predicted_outcome)
+                )[:5],
                 jurisdictional_appeal_rate=jurisdictional_rate
             )
             
