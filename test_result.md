@@ -346,6 +346,7 @@ metadata:
 
 test_plan:
   current_focus:
+    - "Appeal Analysis Metrics Clarification Fix"
     - "Appeal Analysis AI Fallback Issue Fix - Task 1"
   stuck_tasks: []
   test_all: false
