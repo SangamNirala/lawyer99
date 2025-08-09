@@ -349,11 +349,11 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Appeal Analysis Metrics Clarification Fix"
-    - "Appeal Analysis AI Fallback Issue Fix - Task 1"
+    - "Evidence/Complexity Correlation Fix - Task 2"
+    - "Cost Estimation & Risk Threshold Fix - Task 3"
   stuck_tasks: []
   test_all: false
-  test_priority: "ai_fallback_fix_first"
+  test_priority: "sequential_task_completion"
 
 agent_communication:
     -agent: "testing"
