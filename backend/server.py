@@ -13438,6 +13438,16 @@ if LITIGATION_ANALYTICS_AVAILABLE:
         witness_count: Optional[int] = None
         settlement_offers: List[float] = []
     
+    class AppealAnalysisData(BaseModel):
+        appeal_probability: float
+        appeal_confidence: float
+        appeal_factors: List[str] = []
+        appeal_timeline: Optional[int] = None  # days to file appeal
+        appeal_cost_estimate: Optional[float] = None
+        appeal_success_probability: Optional[float] = None
+        preventive_measures: List[str] = []
+        jurisdictional_appeal_rate: Optional[float] = None
+
     class CaseAnalysisResponse(BaseModel):
         case_id: str
         predicted_outcome: str
@@ -13450,6 +13460,7 @@ if LITIGATION_ANALYTICS_AVAILABLE:
         risk_factors: List[str] = []
         success_factors: List[str] = []
         recommendations: List[str] = []
+        appeal_analysis: Optional[AppealAnalysisData] = None  # NEW: Appeal probability analysis
         prediction_date: str
     
     class JudgeInsightsRequest(BaseModel):
