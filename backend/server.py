@@ -14460,6 +14460,13 @@ else:
             status_code=503,
             detail="Judicial Behavior Analyzer is currently unavailable. Please check system configuration."
         )
+    
+    @api_router.post("/litigation/appeal-analysis")
+    async def appeal_analysis_fallback(request: dict):
+        raise HTTPException(
+            status_code=503,
+            detail="Appeal Probability Analyzer is currently unavailable. Please check system configuration."
+        )
 
 # END LITIGATION ANALYTICS ENGINE ENDPOINTS
 # ====================================================================================================
