@@ -14594,6 +14594,19 @@ if LITIGATION_ANALYTICS_AVAILABLE:
             
             # Return dedicated appeal analysis
             if prediction_result.appeal_analysis:
+                # TASK 2: Include case facts analysis in response
+                case_facts_analysis_data = None
+                if prediction_result.appeal_analysis.case_facts_analysis:
+                    case_facts_analysis_data = CaseFactsAnalysisData(
+                        evidence_strength_suggested=prediction_result.appeal_analysis.case_facts_analysis.evidence_strength_suggested,
+                        case_complexity_suggested=prediction_result.appeal_analysis.case_facts_analysis.case_complexity_suggested,
+                        analysis_confidence=prediction_result.appeal_analysis.case_facts_analysis.analysis_confidence,
+                        evidence_reasoning=prediction_result.appeal_analysis.case_facts_analysis.evidence_reasoning,
+                        complexity_reasoning=prediction_result.appeal_analysis.case_facts_analysis.complexity_reasoning,
+                        key_evidence_factors=prediction_result.appeal_analysis.case_facts_analysis.key_evidence_factors,
+                        complexity_factors=prediction_result.appeal_analysis.case_facts_analysis.complexity_factors
+                    )
+
                 return AppealAnalysisData(
                     appeal_probability=prediction_result.appeal_analysis.appeal_probability,
                     appeal_confidence=prediction_result.appeal_analysis.appeal_confidence,
@@ -14602,7 +14615,8 @@ if LITIGATION_ANALYTICS_AVAILABLE:
                     appeal_cost_estimate=prediction_result.appeal_analysis.appeal_cost_estimate,
                     appeal_success_probability=prediction_result.appeal_analysis.appeal_success_probability,
                     preventive_measures=prediction_result.appeal_analysis.preventive_measures,
-                    jurisdictional_appeal_rate=prediction_result.appeal_analysis.jurisdictional_appeal_rate
+                    jurisdictional_appeal_rate=prediction_result.appeal_analysis.jurisdictional_appeal_rate,
+                    case_facts_analysis=case_facts_analysis_data
                 )
             else:
                 # Fallback response
