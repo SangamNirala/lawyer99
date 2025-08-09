@@ -14374,6 +14374,168 @@ if LITIGATION_ANALYTICS_AVAILABLE:
                 detail=f"Error fetching dashboard data: {str(e)}"
             )
 
+    async def _get_appeal_analytics() -> Dict[str, Any]:
+        """Get comprehensive appeal analytics for dashboard"""
+        try:
+            # Get cases with appeal analysis
+            cases_with_appeals = await db.litigation_analytics.find({
+                "appeal_analysis": {"$exists": True, "$ne": None}
+            }).to_list(None)
+            
+            if not cases_with_appeals:
+                return {
+                    "total_appeal_analyses": 0,
+                    "average_appeal_probability": 0.0,
+                    "high_risk_appeals": 0,
+                    "appeal_cost_estimates": {
+                        "total_estimated": 0.0,
+                        "average_cost": 0.0
+                    },
+                    "appeal_timeline_distribution": {
+                        "30_days": 0,
+                        "60_days": 0,
+                        "other": 0
+                    },
+                    "jurisdiction_appeal_patterns": {},
+                    "case_value_appeal_correlation": {
+                        "under_100k": {"count": 0, "avg_appeal_prob": 0.0},
+                        "100k_to_1m": {"count": 0, "avg_appeal_prob": 0.0},
+                        "1m_to_10m": {"count": 0, "avg_appeal_prob": 0.0},
+                        "over_10m": {"count": 0, "avg_appeal_prob": 0.0}
+                    }
+                }
+            
+            # Calculate appeal metrics
+            total_analyses = len(cases_with_appeals)
+            appeal_probs = []
+            high_risk_count = 0
+            total_costs = 0.0
+            timeline_30 = 0
+            timeline_60 = 0
+            timeline_other = 0
+            
+            # Process each case
+            for case in cases_with_appeals:
+                appeal_data = case.get("appeal_analysis", {})
+                
+                if isinstance(appeal_data, dict) and "appeal_probability" in appeal_data:
+                    prob = appeal_data["appeal_probability"]
+                    appeal_probs.append(prob)
+                    
+                    if prob >= 0.70:  # High risk threshold
+                        high_risk_count += 1
+                    
+                    # Cost analysis
+                    if "appeal_cost_estimate" in appeal_data:
+                        total_costs += appeal_data["appeal_cost_estimate"]
+                    
+                    # Timeline analysis
+                    timeline = appeal_data.get("appeal_timeline", 30)
+                    if timeline <= 30:
+                        timeline_30 += 1
+                    elif timeline <= 60:
+                        timeline_60 += 1
+                    else:
+                        timeline_other += 1
+            
+            avg_appeal_prob = sum(appeal_probs) / len(appeal_probs) if appeal_probs else 0.0
+            avg_cost = total_costs / total_analyses if total_analyses > 0 else 0.0
+            
+            # Jurisdiction analysis
+            jurisdiction_patterns = await db.litigation_analytics.aggregate([
+                {"$match": {"appeal_analysis": {"$exists": True, "$ne": None}}},
+                {"$group": {
+                    "_id": "$jurisdiction",
+                    "count": {"$sum": 1},
+                    "avg_appeal_prob": {"$avg": "$appeal_analysis.appeal_probability"},
+                    "avg_appeal_cost": {"$avg": "$appeal_analysis.appeal_cost_estimate"}
+                }},
+                {"$sort": {"count": -1}}
+            ]).to_list(10)
+            
+            # Case value correlation analysis
+            value_correlations = {
+                "under_100k": {"count": 0, "total_prob": 0.0},
+                "100k_to_1m": {"count": 0, "total_prob": 0.0},
+                "1m_to_10m": {"count": 0, "total_prob": 0.0},
+                "over_10m": {"count": 0, "total_prob": 0.0}
+            }
+            
+            for case in cases_with_appeals:
+                case_value = case.get("case_value", 0)
+                appeal_prob = case.get("appeal_analysis", {}).get("appeal_probability", 0)
+                
+                if case_value < 100000:
+                    value_correlations["under_100k"]["count"] += 1
+                    value_correlations["under_100k"]["total_prob"] += appeal_prob
+                elif case_value < 1000000:
+                    value_correlations["100k_to_1m"]["count"] += 1
+                    value_correlations["100k_to_1m"]["total_prob"] += appeal_prob
+                elif case_value < 10000000:
+                    value_correlations["1m_to_10m"]["count"] += 1
+                    value_correlations["1m_to_10m"]["total_prob"] += appeal_prob
+                else:
+                    value_correlations["over_10m"]["count"] += 1
+                    value_correlations["over_10m"]["total_prob"] += appeal_prob
+            
+            # Calculate averages
+            for category in value_correlations:
+                count = value_correlations[category]["count"]
+                if count > 0:
+                    value_correlations[category]["avg_appeal_prob"] = value_correlations[category]["total_prob"] / count
+                else:
+                    value_correlations[category]["avg_appeal_prob"] = 0.0
+                del value_correlations[category]["total_prob"]  # Remove intermediate field
+            
+            return {
+                "total_appeal_analyses": total_analyses,
+                "average_appeal_probability": round(avg_appeal_prob, 3),
+                "high_risk_appeals": high_risk_count,
+                "appeal_cost_estimates": {
+                    "total_estimated": round(total_costs, 2),
+                    "average_cost": round(avg_cost, 2)
+                },
+                "appeal_timeline_distribution": {
+                    "30_days": timeline_30,
+                    "60_days": timeline_60,
+                    "other": timeline_other
+                },
+                "jurisdiction_appeal_patterns": [
+                    {
+                        "jurisdiction": pattern["_id"],
+                        "case_count": pattern["count"],
+                        "avg_appeal_probability": round(pattern.get("avg_appeal_prob", 0.0), 3),
+                        "avg_appeal_cost": round(pattern.get("avg_appeal_cost", 0.0), 2)
+                    }
+                    for pattern in jurisdiction_patterns
+                ],
+                "case_value_appeal_correlation": value_correlations
+            }
+            
+        except Exception as e:
+            logger.warning(f"⚠️ Failed to gather appeal analytics: {e}")
+            return {
+                "total_appeal_analyses": 0,
+                "average_appeal_probability": 0.0,
+                "high_risk_appeals": 0,
+                "appeal_cost_estimates": {
+                    "total_estimated": 0.0,
+                    "average_cost": 0.0
+                },
+                "appeal_timeline_distribution": {
+                    "30_days": 0,
+                    "60_days": 0,
+                    "other": 0
+                },
+                "jurisdiction_appeal_patterns": [],
+                "case_value_appeal_correlation": {
+                    "under_100k": {"count": 0, "avg_appeal_prob": 0.0},
+                    "100k_to_1m": {"count": 0, "avg_appeal_prob": 0.0},
+                    "1m_to_10m": {"count": 0, "avg_appeal_prob": 0.0},
+                    "over_10m": {"count": 0, "avg_appeal_prob": 0.0}
+                }
+            }
+
     @api_router.post("/litigation/appeal-analysis", response_model=AppealAnalysisData)
     async def analyze_appeal_probability(request: CaseAnalysisRequest):
         """
