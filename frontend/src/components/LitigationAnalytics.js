@@ -1367,6 +1367,383 @@ const JudgeInsights = () => {
   );
 };
 
+// Appeal Analysis Component
+const AppealAnalysis = () => {
+  const [caseData, setCaseData] = useState({
+    case_type: '',
+    jurisdiction: '',
+    court_level: 'district',
+    judge_name: '',
+    case_facts: '',
+    legal_issues: [],
+    case_complexity: 0.5,
+    case_value: '',
+    evidence_strength: 5,
+    witness_count: '',
+    settlement_offers: []
+  });
+  const [appealAnalysis, setAppealAnalysis] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const caseTypes = [
+    { value: 'civil', label: 'Civil' },
+    { value: 'criminal', label: 'Criminal' },
+    { value: 'commercial', label: 'Commercial' },
+    { value: 'employment', label: 'Employment' },
+    { value: 'intellectual_property', label: 'Intellectual Property' },
+    { value: 'family', label: 'Family Law' },
+    { value: 'personal_injury', label: 'Personal Injury' },
+    { value: 'bankruptcy', label: 'Bankruptcy' },
+    { value: 'tax', label: 'Tax Law' },
+    { value: 'environmental', label: 'Environmental' }
+  ];
+
+  const jurisdictions = [
+    { value: 'federal', label: 'Federal' },
+    { value: 'california', label: 'California' },
+    { value: 'new_york', label: 'New York' },
+    { value: 'texas', label: 'Texas' },
+    { value: 'florida', label: 'Florida' },
+    { value: 'illinois', label: 'Illinois' }
+  ];
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    try {
+      const requestData = {
+        ...caseData,
+        case_value: caseData.case_value ? parseFloat(caseData.case_value) : null,
+        witness_count: caseData.witness_count ? parseInt(caseData.witness_count) : null,
+        case_complexity: parseFloat(caseData.case_complexity),
+        evidence_strength: parseFloat(caseData.evidence_strength)
+      };
+
+      const response = await axios.post(`${API}/litigation/appeal-analysis`, requestData);
+      setAppealAnalysis(response.data);
+    } catch (error) {
+      console.error('Appeal analysis error:', error);
+      setError('Failed to analyze appeal probability. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getRiskLevel = (probability) => {
+    if (probability < 0.2) return { level: 'Low', color: 'text-green-600 bg-green-50', icon: CheckCircle };
+    if (probability < 0.4) return { level: 'Medium', color: 'text-yellow-600 bg-yellow-50', icon: AlertTriangle };
+    return { level: 'High', color: 'text-red-600 bg-red-50', icon: AlertCircle };
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Scale className="h-6 w-6 text-blue-600" />
+            <span>Appeal Probability Analysis</span>
+          </CardTitle>
+          <CardDescription>
+            Comprehensive AI-powered appeal risk assessment with preventive measures and cost analysis
+          </CardDescription>
+        </CardHeader>
+      </Card>
+
+      {/* Case Input Form */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Case Information</CardTitle>
+          <CardDescription>
+            Enter case details for comprehensive appeal probability analysis
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Basic Case Information */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="case_type">Case Type</Label>
+                <Select
+                  value={caseData.case_type}
+                  onValueChange={(value) => setCaseData({...caseData, case_type: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select case type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {caseTypes.map(type => (
+                      <SelectItem key={type.value} value={type.value}>
+                        {type.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="jurisdiction">Jurisdiction</Label>
+                <Select
+                  value={caseData.jurisdiction}
+                  onValueChange={(value) => setCaseData({...caseData, jurisdiction: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select jurisdiction" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {jurisdictions.map(jurisdiction => (
+                      <SelectItem key={jurisdiction.value} value={jurisdiction.value}>
+                        {jurisdiction.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="case_value">Case Value ($)</Label>
+                <Input
+                  id="case_value"
+                  type="number"
+                  placeholder="e.g., 500000"
+                  value={caseData.case_value}
+                  onChange={(e) => setCaseData({...caseData, case_value: e.target.value})}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="judge_name">Judge Name (Optional)</Label>
+                <Input
+                  id="judge_name"
+                  placeholder="e.g., Judge Smith"
+                  value={caseData.judge_name}
+                  onChange={(e) => setCaseData({...caseData, judge_name: e.target.value})}
+                />
+              </div>
+            </div>
+
+            {/* Evidence Strength and Complexity */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <Label htmlFor="evidence_strength">Evidence Strength: {caseData.evidence_strength}/10</Label>
+                <input
+                  id="evidence_strength"
+                  type="range"
+                  min="1"
+                  max="10"
+                  step="1"
+                  value={caseData.evidence_strength}
+                  onChange={(e) => setCaseData({...caseData, evidence_strength: e.target.value})}
+                  className="w-full mt-2"
+                />
+                <div className="flex justify-between text-xs text-gray-500 mt-1">
+                  <span>Very Weak</span>
+                  <span>Very Strong</span>
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="case_complexity">Case Complexity: {Math.round(caseData.case_complexity * 100)}%</Label>
+                <input
+                  id="case_complexity"
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.1"
+                  value={caseData.case_complexity}
+                  onChange={(e) => setCaseData({...caseData, case_complexity: e.target.value})}
+                  className="w-full mt-2"
+                />
+                <div className="flex justify-between text-xs text-gray-500 mt-1">
+                  <span>Simple</span>
+                  <span>Very Complex</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Case Facts */}
+            <div>
+              <Label htmlFor="case_facts">Case Facts & Background</Label>
+              <Textarea
+                id="case_facts"
+                placeholder="Brief description of the case facts, legal issues, and key circumstances..."
+                value={caseData.case_facts}
+                onChange={(e) => setCaseData({...caseData, case_facts: e.target.value})}
+                rows={4}
+                className="mt-1"
+              />
+            </div>
+
+            <Button 
+              type="submit" 
+              disabled={loading || !caseData.case_type || !caseData.jurisdiction}
+              className="w-full"
+            >
+              {loading ? (
+                <>
+                  <RefreshCw className="animate-spin h-4 w-4 mr-2" />
+                  Analyzing Appeal Risk...
+                </>
+              ) : (
+                <>
+                  <Scale className="h-4 w-4 mr-2" />
+                  Analyze Appeal Probability
+                </>
+              )}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+
+      {/* Error Display */}
+      {error && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      {/* Appeal Analysis Results */}
+      {appealAnalysis && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <BarChart3 className="h-5 w-5" />
+              <span>Appeal Risk Assessment</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Primary Appeal Metrics */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="text-center p-4 bg-orange-50 rounded-lg">
+                <Scale className="h-6 w-6 text-orange-600 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-orange-900">
+                  {(appealAnalysis.appeal_probability * 100).toFixed(1)}%
+                </div>
+                <div className="text-sm text-orange-600">Appeal Probability</div>
+                <Progress value={appealAnalysis.appeal_probability * 100} className="mt-2 h-2" />
+              </div>
+
+              <div className="text-center p-4 bg-amber-50 rounded-lg">
+                <Target className="h-6 w-6 text-amber-600 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-amber-900">
+                  {(appealAnalysis.appeal_success_probability * 100).toFixed(1)}%
+                </div>
+                <div className="text-sm text-amber-600">Appeal Success Rate</div>
+                <Progress value={appealAnalysis.appeal_success_probability * 100} className="mt-2 h-2" />
+              </div>
+
+              <div className="text-center p-4 bg-blue-50 rounded-lg">
+                <Clock className="h-6 w-6 text-blue-600 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-blue-900">
+                  {appealAnalysis.appeal_timeline} days
+                </div>
+                <div className="text-sm text-blue-600">Appeal Deadline</div>
+              </div>
+
+              <div className="text-center p-4 bg-green-50 rounded-lg">
+                <DollarSign className="h-6 w-6 text-green-600 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-green-900">
+                  ${appealAnalysis.appeal_cost_estimate?.toLocaleString()}
+                </div>
+                <div className="text-sm text-green-600">Estimated Cost</div>
+              </div>
+            </div>
+
+            {/* Risk Level Indicator */}
+            {(() => {
+              const risk = getRiskLevel(appealAnalysis.appeal_probability);
+              const RiskIcon = risk.icon;
+              return (
+                <div className={`p-4 rounded-lg ${risk.color} border`}>
+                  <div className="flex items-center space-x-2">
+                    <RiskIcon className="h-5 w-5" />
+                    <span className="font-semibold">Appeal Risk Level: {risk.level}</span>
+                  </div>
+                  <div className="mt-2 text-sm">
+                    {appealAnalysis.appeal_probability < 0.2 
+                      ? "Low appeal probability based on case factors. Minimal preventive measures needed."
+                      : appealAnalysis.appeal_probability < 0.4
+                      ? "Moderate appeal risk. Consider implementing recommended preventive measures."
+                      : "High appeal probability. Strong preventive measures and careful trial preparation essential."}
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Jurisdictional Comparison */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center mb-2">
+                  <BarChart3 className="h-4 w-4 text-gray-600 mr-2" />
+                  <span className="font-semibold text-gray-700">Jurisdictional Average</span>
+                </div>
+                <div className="text-xl font-bold text-gray-900">
+                  {(appealAnalysis.jurisdictional_appeal_rate * 100).toFixed(1)}%
+                </div>
+                <div className="text-sm text-gray-600">
+                  Your case risk is {appealAnalysis.appeal_probability > appealAnalysis.jurisdictional_appeal_rate ? 'above' : 'below'} average
+                </div>
+              </div>
+
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center mb-2">
+                  <TrendingUp className="h-4 w-4 text-gray-600 mr-2" />
+                  <span className="font-semibold text-gray-700">Confidence Level</span>
+                </div>
+                <div className="text-xl font-bold text-gray-900">
+                  {(appealAnalysis.appeal_confidence * 100).toFixed(1)}%
+                </div>
+                <div className="text-sm text-gray-600">Analysis reliability</div>
+              </div>
+            </div>
+
+            {/* Appeal Factors & Preventive Measures */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <h3 className="text-lg font-semibold mb-3 text-red-700 flex items-center">
+                  <AlertTriangle className="h-4 w-4 mr-2" />
+                  Appeal Risk Factors
+                </h3>
+                <div className="space-y-2">
+                  {appealAnalysis.appeal_factors.map((factor, index) => (
+                    <div key={index} className="p-3 bg-red-50 rounded-lg border-l-4 border-red-400">
+                      <div className="flex items-start">
+                        <span className="text-red-400 mr-2">•</span>
+                        <span className="text-sm text-red-700">{factor}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold mb-3 text-green-700 flex items-center">
+                  <Shield className="h-4 w-4 mr-2" />
+                  Preventive Measures
+                </h3>
+                <div className="space-y-2">
+                  {appealAnalysis.preventive_measures.map((measure, index) => (
+                    <div key={index} className="p-3 bg-green-50 rounded-lg border-l-4 border-green-400">
+                      <div className="flex items-start">
+                        <span className="text-green-400 mr-2">→</span>
+                        <span className="text-sm text-green-700">{measure}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+};
+
 // Main litigation analytics dashboard
 const LitigationAnalytics = ({ onBack }) => {
   const [activeTab, setActiveTab] = useState('predictor');
