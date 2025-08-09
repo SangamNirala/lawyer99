@@ -1577,7 +1577,7 @@ const LitigationAnalytics = ({ onBack }) => {
 
         {/* Enhanced Main Tabs Interface */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4 mb-8 h-auto p-1">
+          <TabsList className="grid w-full grid-cols-5 mb-8 h-auto p-1">
             <TabsTrigger value="predictor" className="flex flex-col items-center space-y-1 p-4 h-auto">
               <Brain className="h-5 w-5" />
               <span className="font-medium">Case Predictor</span>
@@ -1592,6 +1592,11 @@ const LitigationAnalytics = ({ onBack }) => {
               <Calculator className="h-5 w-5" />
               <span className="font-medium">Settlement Calculator</span>
               <span className="text-xs text-gray-500">Probability Analytics</span>
+            </TabsTrigger>
+            <TabsTrigger value="appeal" className="flex flex-col items-center space-y-1 p-4 h-auto">
+              <Scale className="h-5 w-5" />
+              <span className="font-medium">Appeal Analysis</span>
+              <span className="text-xs text-gray-500">Risk Assessment</span>
             </TabsTrigger>
             <TabsTrigger value="strategy" className="flex flex-col items-center space-y-1 p-4 h-auto">
               <Lightbulb className="h-5 w-5" />
