@@ -1590,7 +1590,7 @@ const AppealAnalysis = () => {
               ) : (
                 <>
                   <Scale className="h-4 w-4 mr-2" />
-                  Analyze Appeal Probability
+                  Analyze Appeal Filing Risk
                 </>
               )}
             </Button>
