@@ -166,7 +166,20 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "USER REPORTED ISSUE - APPEAL PROBABILITY ANALYSIS ERROR:
+user_problem_statement: "CONTINUATION TASK - APPEAL ANALYSIS FALLBACK ISSUES:
+
+USER REPORTED CRITICAL PROBLEMS WITH APPEAL ANALYSIS:
+1. **AI Analysis Fallback Issue**: System returns 'AI analysis unavailable - using enhanced default factors' and 'AI analysis unavailable - using enhanced default measures' instead of proper AI-powered analysis of detailed case facts
+2. **Evidence/Complexity Mismatch**: Evidence strength and complexity sliders not properly correlating with provided case narrative  
+3. **Appeal Cost Issues**: Cost estimates inconsistent ($97,500 for $250,000 case seems high)
+4. **Risk Threshold Mismatch**: Says 'High appeal probability' but shows 45.2% (less than 50%)
+
+CURRENT TASK SEQUENCE (ONE AT A TIME):
+✅ TASK 1: Fix AI analysis fallback issue - enable proper NLP parsing of case facts using Gemini/Groq
+⏳ TASK 2: Improve evidence strength and complexity correlation with case narrative
+⏳ TASK 3: Fix cost estimation model and risk threshold labeling
+
+PREVIOUS USER ISSUE (RESOLVED) - APPEAL PROBABILITY ANALYSIS ERROR:
 
 USER ERROR REPORT:
 In Litigation Analytics Engine tab, within the Appeal Probability Analysis section when user fills the details and clicks on 'Appeal Analysis Probability' button, the user gets error:
