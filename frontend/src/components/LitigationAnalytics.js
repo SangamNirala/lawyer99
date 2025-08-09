@@ -1591,13 +1591,31 @@ const AppealAnalysis = () => {
             {/* TASK 2: Add AI Analysis Summary when available */}
             {appealAnalysis?.case_facts_analysis && (
               <div className="border rounded-lg p-4 bg-gradient-to-r from-blue-50 to-green-50">
-                <h4 className="font-semibold text-gray-800 mb-3 flex items-center">
-                  <Brain className="h-4 w-4 mr-2 text-blue-600" />
-                  AI Case Analysis Summary
-                  <Badge variant="secondary" className="ml-2 text-xs">
-                    {Math.round(appealAnalysis.case_facts_analysis.analysis_confidence * 100)}% Confidence
-                  </Badge>
-                </h4>
+                <div className="flex justify-between items-start mb-3">
+                  <h4 className="font-semibold text-gray-800 flex items-center">
+                    <Brain className="h-4 w-4 mr-2 text-blue-600" />
+                    AI Case Analysis Summary
+                    <Badge variant="secondary" className="ml-2 text-xs">
+                      {Math.round(appealAnalysis.case_facts_analysis.analysis_confidence * 100)}% Confidence
+                    </Badge>
+                  </h4>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setCaseData({
+                        ...caseData,
+                        evidence_strength: Math.round(appealAnalysis.case_facts_analysis.evidence_strength_suggested),
+                        case_complexity: appealAnalysis.case_facts_analysis.case_complexity_suggested
+                      });
+                    }}
+                    className="text-xs"
+                  >
+                    <Lightbulb className="h-3 w-3 mr-1" />
+                    Apply AI Suggestions
+                  </Button>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   {appealAnalysis.case_facts_analysis.key_evidence_factors.length > 0 && (
                     <div>
