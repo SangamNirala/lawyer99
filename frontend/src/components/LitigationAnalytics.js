@@ -1585,7 +1585,7 @@ const AppealAnalysis = () => {
               {loading ? (
                 <>
                   <RefreshCw className="animate-spin h-4 w-4 mr-2" />
-                  Analyzing Appeal Risk...
+                  Analyzing Appeal Filing Risk...
                 </>
               ) : (
                 <>
