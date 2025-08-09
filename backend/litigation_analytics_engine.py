@@ -551,17 +551,17 @@ class LitigationAnalyticsEngine:
             return 1.0
         
         if case_value >= 10000000:    # $10M+
-            return 3.2
+            return 2.2  # Reduced from 3.2
         elif case_value >= 5000000:   # $5M-$10M  
-            return 2.5
+            return 1.8  # Reduced from 2.5
         elif case_value >= 1000000:   # $1M-$5M
-            return 1.8
+            return 1.5  # Reduced from 1.8
         elif case_value >= 500000:    # $500K-$1M
-            return 1.3
+            return 1.2  # Reduced from 1.3
         elif case_value >= 100000:    # $100K-$500K
             return 1.0
         else:                         # Under $100K
-            return 0.6
+            return 0.7  # Slightly reduced from 0.6
 
     def _get_evidence_appeal_multiplier(self, evidence_strength: Optional[float]) -> float:
         """Get appeal probability multiplier based on evidence strength (inverse relationship)"""
