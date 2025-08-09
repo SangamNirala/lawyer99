@@ -647,33 +647,63 @@ class LitigationAnalyticsEngine:
     async def _get_ai_appeal_analysis(self, prompt: str) -> Dict[str, Any]:
         """Get AI-powered appeal analysis from ensemble approach"""
         try:
+            logger.info("🤖 Starting AI appeal analysis...")
+            
             # Use both Gemini and Groq for comprehensive analysis
-            gemini_response = await asyncio.to_thread(
-                self.gemini_model.generate_content,
-                prompt + "\n\nProvide specific appeal factors and preventive measures."
-            )
+            gemini_response = None
+            groq_response = None
             
-            groq_response = await asyncio.to_thread(
-                self.groq_client.chat.completions.create,
-                model="mixtral-8x7b-32768",
-                messages=[{"role": "user", "content": prompt + "\n\nFocus on practical appellate risk assessment and mitigation strategies."}],
-                temperature=0.1
-            )
+            # Try Gemini first
+            try:
+                if hasattr(self, 'gemini_model') and self.gemini_model:
+                    logger.info("📊 Calling Gemini for appeal analysis...")
+                    gemini_response = await asyncio.to_thread(
+                        self.gemini_model.generate_content,
+                        prompt + "\n\nProvide specific appeal factors and preventive measures in clear bullet points."
+                    )
+                    logger.info("✅ Gemini appeal analysis completed")
+            except Exception as gemini_error:
+                logger.warning(f"⚠️ Gemini appeal analysis failed: {gemini_error}")
             
-            # Parse and combine responses
-            appeal_factors = self._extract_appeal_factors(gemini_response.text, groq_response.choices[0].message.content)
-            preventive_measures = self._extract_preventive_measures(gemini_response.text, groq_response.choices[0].message.content)
+            # Try Groq second
+            try:
+                if hasattr(self, 'groq_client') and self.groq_client:
+                    logger.info("🚀 Calling Groq for appeal analysis...")
+                    groq_response = await asyncio.to_thread(
+                        self.groq_client.chat.completions.create,
+                        model="mixtral-8x7b-32768",
+                        messages=[{"role": "user", "content": prompt + "\n\nFocus on practical appellate risk assessment and mitigation strategies. Provide clear bullet points."}],
+                        temperature=0.1,
+                        max_tokens=1500
+                    )
+                    logger.info("✅ Groq appeal analysis completed")
+            except Exception as groq_error:
+                logger.warning(f"⚠️ Groq appeal analysis failed: {groq_error}")
             
-            return {
-                "appeal_factors": appeal_factors,
-                "preventive_measures": preventive_measures
-            }
+            # If we have at least one response, process it
+            if gemini_response or groq_response:
+                gemini_text = gemini_response.text if gemini_response else ""
+                groq_text = groq_response.choices[0].message.content if groq_response else ""
+                
+                # Parse and combine responses
+                appeal_factors = self._extract_appeal_factors(gemini_text, groq_text)
+                preventive_measures = self._extract_preventive_measures(gemini_text, groq_text)
+                
+                logger.info(f"✅ Successfully extracted {len(appeal_factors)} appeal factors and {len(preventive_measures)} preventive measures")
+                
+                return {
+                    "appeal_factors": appeal_factors,
+                    "preventive_measures": preventive_measures
+                }
+            else:
+                logger.warning("⚠️ Both AI services failed, using enhanced default analysis")
+                raise Exception("Both Gemini and Groq services unavailable")
             
         except Exception as e:
-            logger.warning(f"⚠️ AI appeal analysis failed: {e}")
+            logger.warning(f"⚠️ AI appeal analysis failed completely: {e}")
             return {
-                "appeal_factors": ["AI analysis unavailable - using default factors"],
-                "preventive_measures": ["AI analysis unavailable - using default measures"]
+                "appeal_factors": ["AI analysis unavailable - using enhanced default factors"],
+                "preventive_measures": ["AI analysis unavailable - using enhanced default measures"]
             }
 
     def _extract_appeal_factors(self, gemini_text: str, groq_text: str) -> List[str]:
