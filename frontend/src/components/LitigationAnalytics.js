@@ -1617,6 +1617,10 @@ const LitigationAnalytics = ({ onBack }) => {
             <SettlementCalculator />
           </TabsContent>
 
+          <TabsContent value="appeal">
+            <AppealAnalysis />
+          </TabsContent>
+
           <TabsContent value="strategy">
             <LitigationStrategy />
           </TabsContent>
