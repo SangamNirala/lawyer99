@@ -1616,6 +1616,100 @@ const AppealAnalysis = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
+            {/* AI Case Facts Analysis - TASK 2: Display AI-analyzed evidence/complexity correlation */}
+            {appealAnalysis?.case_facts_analysis && (
+              <div className="border rounded-lg p-6 bg-gradient-to-r from-blue-50 to-green-50">
+                <div className="flex justify-between items-start mb-4">
+                  <h3 className="text-lg font-semibold text-gray-800 flex items-center">
+                    <Brain className="h-5 w-5 mr-2 text-blue-600" />
+                    AI Case Analysis Summary
+                    <Badge variant="secondary" className="ml-3 text-xs">
+                      {Math.round(appealAnalysis.case_facts_analysis.analysis_confidence * 100)}% Confidence
+                    </Badge>
+                  </h3>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setCaseData({
+                        ...caseData,
+                        evidence_strength: Math.round(appealAnalysis.case_facts_analysis.evidence_strength_suggested),
+                        case_complexity: appealAnalysis.case_facts_analysis.case_complexity_suggested
+                      });
+                    }}
+                    className="text-xs"
+                  >
+                    <Lightbulb className="h-3 w-3 mr-1" />
+                    Apply AI Suggestions
+                  </Button>
+                </div>
+
+                {/* AI Suggestions Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  <div className="bg-white p-4 rounded-lg border">
+                    <div className="flex justify-between items-center mb-3">
+                      <h4 className="font-medium text-blue-700">Evidence Strength Assessment</h4>
+                      <div className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded">
+                        AI Suggests: {appealAnalysis.case_facts_analysis.evidence_strength_suggested.toFixed(1)}/10
+                      </div>
+                    </div>
+                    <div className="text-sm text-gray-700 mb-2">
+                      User Input: {caseData.evidence_strength}/10
+                    </div>
+                    <div className="text-xs text-gray-600 p-2 bg-gray-50 rounded">
+                      <strong>AI Analysis:</strong> {appealAnalysis.case_facts_analysis.evidence_reasoning}
+                    </div>
+                  </div>
+
+                  <div className="bg-white p-4 rounded-lg border">
+                    <div className="flex justify-between items-center mb-3">
+                      <h4 className="font-medium text-green-700">Case Complexity Assessment</h4>
+                      <div className="text-xs bg-green-50 text-green-700 px-2 py-1 rounded">
+                        AI Suggests: {Math.round(appealAnalysis.case_facts_analysis.case_complexity_suggested * 100)}%
+                      </div>
+                    </div>
+                    <div className="text-sm text-gray-700 mb-2">
+                      User Input: {Math.round(caseData.case_complexity * 100)}%
+                    </div>
+                    <div className="text-xs text-gray-600 p-2 bg-gray-50 rounded">
+                      <strong>AI Analysis:</strong> {appealAnalysis.case_facts_analysis.complexity_reasoning}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Evidence and Complexity Factors */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {appealAnalysis.case_facts_analysis.key_evidence_factors.length > 0 && (
+                    <div>
+                      <h4 className="font-medium text-blue-700 mb-2">Key Evidence Factors</h4>
+                      <ul className="space-y-1">
+                        {appealAnalysis.case_facts_analysis.key_evidence_factors.map((factor, index) => (
+                          <li key={index} className="text-blue-600 flex items-start text-sm">
+                            <span className="inline-block w-1.5 h-1.5 rounded-full bg-blue-400 mt-2 mr-2 flex-shrink-0"></span>
+                            {factor}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {appealAnalysis.case_facts_analysis.complexity_factors.length > 0 && (
+                    <div>
+                      <h4 className="font-medium text-green-700 mb-2">Complexity Factors</h4>
+                      <ul className="space-y-1">
+                        {appealAnalysis.case_facts_analysis.complexity_factors.map((factor, index) => (
+                          <li key={index} className="text-green-600 flex items-start text-sm">
+                            <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-400 mt-2 mr-2 flex-shrink-0"></span>
+                            {factor}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Primary Appeal Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="text-center p-4 bg-orange-50 rounded-lg">
