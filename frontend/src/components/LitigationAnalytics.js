@@ -1525,10 +1525,17 @@ const AppealAnalysis = () => {
               </div>
             </div>
 
-            {/* Evidence Strength and Complexity */}
+            {/* Evidence Strength and Complexity - TASK 2: Enhanced with AI Suggestions */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <Label htmlFor="evidence_strength">Evidence Strength: {caseData.evidence_strength}/10</Label>
+                <div className="flex justify-between items-center mb-2">
+                  <Label htmlFor="evidence_strength">Evidence Strength: {caseData.evidence_strength}/10</Label>
+                  {appealAnalysis?.case_facts_analysis && (
+                    <div className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded">
+                      AI Suggests: {appealAnalysis.case_facts_analysis.evidence_strength_suggested.toFixed(1)}/10
+                    </div>
+                  )}
+                </div>
                 <input
                   id="evidence_strength"
                   type="range"
@@ -1543,10 +1550,22 @@ const AppealAnalysis = () => {
                   <span>Very Weak</span>
                   <span>Very Strong</span>
                 </div>
+                {appealAnalysis?.case_facts_analysis?.evidence_reasoning && (
+                  <div className="text-xs text-gray-600 mt-2 p-2 bg-gray-50 rounded">
+                    <strong>AI Analysis:</strong> {appealAnalysis.case_facts_analysis.evidence_reasoning}
+                  </div>
+                )}
               </div>
 
               <div>
-                <Label htmlFor="case_complexity">Case Complexity: {Math.round(caseData.case_complexity * 100)}%</Label>
+                <div className="flex justify-between items-center mb-2">
+                  <Label htmlFor="case_complexity">Case Complexity: {Math.round(caseData.case_complexity * 100)}%</Label>
+                  {appealAnalysis?.case_facts_analysis && (
+                    <div className="text-xs bg-green-50 text-green-700 px-2 py-1 rounded">
+                      AI Suggests: {Math.round(appealAnalysis.case_facts_analysis.case_complexity_suggested * 100)}%
+                    </div>
+                  )}
+                </div>
                 <input
                   id="case_complexity"
                   type="range"
@@ -1561,8 +1580,54 @@ const AppealAnalysis = () => {
                   <span>Simple</span>
                   <span>Very Complex</span>
                 </div>
+                {appealAnalysis?.case_facts_analysis?.complexity_reasoning && (
+                  <div className="text-xs text-gray-600 mt-2 p-2 bg-gray-50 rounded">
+                    <strong>AI Analysis:</strong> {appealAnalysis.case_facts_analysis.complexity_reasoning}
+                  </div>
+                )}
               </div>
             </div>
+
+            {/* TASK 2: Add AI Analysis Summary when available */}
+            {appealAnalysis?.case_facts_analysis && (
+              <div className="border rounded-lg p-4 bg-gradient-to-r from-blue-50 to-green-50">
+                <h4 className="font-semibold text-gray-800 mb-3 flex items-center">
+                  <Brain className="h-4 w-4 mr-2 text-blue-600" />
+                  AI Case Analysis Summary
+                  <Badge variant="secondary" className="ml-2 text-xs">
+                    {Math.round(appealAnalysis.case_facts_analysis.analysis_confidence * 100)}% Confidence
+                  </Badge>
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  {appealAnalysis.case_facts_analysis.key_evidence_factors.length > 0 && (
+                    <div>
+                      <div className="font-medium text-blue-700 mb-1">Key Evidence Factors</div>
+                      <ul className="space-y-1">
+                        {appealAnalysis.case_facts_analysis.key_evidence_factors.map((factor, index) => (
+                          <li key={index} className="text-blue-600 flex items-start">
+                            <span className="inline-block w-1 h-1 rounded-full bg-blue-400 mt-2 mr-2 flex-shrink-0"></span>
+                            {factor}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {appealAnalysis.case_facts_analysis.complexity_factors.length > 0 && (
+                    <div>
+                      <div className="font-medium text-green-700 mb-1">Complexity Factors</div>
+                      <ul className="space-y-1">
+                        {appealAnalysis.case_facts_analysis.complexity_factors.map((factor, index) => (
+                          <li key={index} className="text-green-600 flex items-start">
+                            <span className="inline-block w-1 h-1 rounded-full bg-green-400 mt-2 mr-2 flex-shrink-0"></span>
+                            {factor}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Case Facts */}
             <div>
