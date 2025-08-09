@@ -630,35 +630,56 @@ class LitigationAnalyticsEngine:
     async def _build_appeal_analysis_prompt(self, case_data: CaseData, predicted_outcome: str,
                                           appeal_probability: float, similar_cases: List[Dict]) -> str:
         """Build comprehensive prompt for AI appeal analysis"""
+        
+        # Include detailed case facts if available - this is crucial for AI analysis mode
+        case_facts_section = ""
+        if case_data.case_facts and case_data.case_facts.strip():
+            case_facts_section = f"""
+        DETAILED CASE FACTS & BACKGROUND:
+        {case_data.case_facts}
+        
+        LEGAL ISSUES IDENTIFIED:
+        {', '.join(case_data.legal_issues) if case_data.legal_issues else 'Not specified'}
+        """
+        
         prompt = f"""
-        APPEAL PROBABILITY ANALYSIS - LEGAL CASE ASSESSMENT
+        APPEAL PROBABILITY ANALYSIS - COMPREHENSIVE LEGAL CASE ASSESSMENT
         
         CASE DETAILS:
-        - Case Type: {case_data.case_type.value}
+        - Case Type: {case_data.case_type.value.replace('_', ' ').title()}
         - Predicted Outcome: {predicted_outcome.replace('_', ' ').title()}
         - Calculated Appeal Probability: {appeal_probability:.1%}
         - Case Value: {f'${case_data.case_value:,.2f}' if case_data.case_value else 'Not specified'}
         - Evidence Strength: {case_data.evidence_strength or 'Not rated'}/10
-        - Case Complexity: {case_data.case_complexity*100:.0f}% if case_data.case_complexity else 'Not specified'
-        - Jurisdiction: {case_data.jurisdiction}
-        - Court Level: {case_data.court_level}
+        - Case Complexity: {f'{case_data.case_complexity*100:.0f}%' if case_data.case_complexity else 'Not specified'}
+        - Jurisdiction: {case_data.jurisdiction.replace('_', ' ').title()}
+        - Court Level: {case_data.court_level.replace('_', ' ').title()}
+        - Judge: {case_data.judge_name or 'Not specified'}
+        {case_facts_section}
         
         HISTORICAL CONTEXT:
         Found {len(similar_cases)} similar cases for pattern analysis.
         
-        ANALYSIS REQUIRED:
-        1. Identify specific appeal risk factors for this case
-        2. Recommend preventive measures to reduce appeal probability
-        3. Assess potential grounds for appeal based on case characteristics
-        4. Suggest trial strategies to minimize appellate issues
+        COMPREHENSIVE ANALYSIS REQUIRED:
+        Based on the detailed case facts above, provide a thorough appeal risk assessment including:
         
-        Provide detailed analysis focusing on:
-        - Legal issues most likely to be challenged on appeal
-        - Procedural safeguards to implement during trial
-        - Settlement considerations given appeal risk
-        - Post-trial motion strategies
+        1. **Specific Appeal Risk Factors**: Identify concrete risks based on the actual case circumstances, evidence quality, legal issues, and procedural history
+        2. **Preventive Measures**: Recommend specific actions to reduce appeal probability based on the case details
+        3. **Procedural Vulnerabilities**: Assess potential grounds for appeal based on the case narrative and complexity
+        4. **Strategic Recommendations**: Suggest trial strategies tailored to this specific case to minimize appellate issues
         
-        Respond with structured analysis including specific, actionable recommendations.
+        Focus your analysis on:
+        - Legal issues most likely to be challenged based on the case facts
+        - Evidence-related vulnerabilities that could be appealed
+        - Procedural safeguards needed for this specific case type and jurisdiction
+        - Settlement considerations given the specific appeal risks identified
+        - Case-specific post-trial motion strategies
+        
+        **IMPORTANT**: Provide specific, actionable recommendations based on the actual case details provided, not generic advice.
+        
+        Format your response with clear sections for:
+        - APPEAL FACTORS: [List 3-5 specific risk factors]
+        - PREVENTIVE MEASURES: [List 3-5 specific recommendations]
         """
         return prompt
 
