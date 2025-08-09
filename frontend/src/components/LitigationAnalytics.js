@@ -1448,7 +1448,7 @@ const AppealAnalysis = () => {
             <span>Appeal Probability Analysis</span>
           </CardTitle>
           <CardDescription>
-            Comprehensive AI-powered appeal risk assessment with preventive measures and cost analysis
+            Comprehensive appeal filing risk assessment and success probability analysis with preventive measures
           </CardDescription>
         </CardHeader>
       </Card>
