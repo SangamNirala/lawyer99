@@ -1265,6 +1265,161 @@ class LitigationAnalyticsEngine:
         
         return measures[:5]
 
+    async def _analyze_case_facts_ai(self, case_facts: str, case_type: str) -> CaseFactsAnalysis:
+        """
+        TASK 2: AI-powered analysis of case facts to suggest evidence strength and complexity
+        
+        This method analyzes the case narrative using AI to provide intelligent suggestions
+        for evidence strength (1-10 scale) and case complexity (0-1 scale).
+        """
+        try:
+            logger.info("🔍 Analyzing case facts for evidence/complexity correlation")
+            
+            # Build AI prompt for case facts analysis
+            analysis_prompt = f"""
+            As a legal expert, analyze the following case facts and provide assessments for evidence strength and case complexity.
+
+            Case Type: {case_type.upper()}
+            Case Facts: {case_facts}
+
+            Please provide:
+            1. Evidence Strength (1-10 scale where 1=very weak, 10=very strong)
+            2. Case Complexity (0-100% where 0%=simple, 100%=highly complex)
+            3. Confidence in your analysis (0-100%)
+            4. Brief reasoning for evidence strength assessment
+            5. Brief reasoning for complexity assessment
+            6. Key evidence factors that support or weaken the case
+            7. Key complexity factors that make the case simple or complex
+
+            Consider these factors:
+            - Documentary evidence quality and quantity
+            - Witness testimony strength
+            - Legal precedent clarity
+            - Factual disputes complexity
+            - Legal theory complexity
+            - Procedural complications
+            - Expert testimony requirements
+            - Multi-jurisdictional issues
+
+            Respond in JSON format:
+            {{
+                "evidence_strength": <number 1-10>,
+                "case_complexity": <number 0-100>,
+                "analysis_confidence": <number 0-100>,
+                "evidence_reasoning": "<brief explanation>",
+                "complexity_reasoning": "<brief explanation>",
+                "key_evidence_factors": ["factor1", "factor2", "factor3"],
+                "complexity_factors": ["factor1", "factor2", "factor3"]
+            }}
+            """
+            
+            # Get AI analysis using Gemini
+            try:
+                genai.configure(api_key=os.environ.get('GEMINI_API_KEY'))
+                model = genai.GenerativeModel('gemini-1.5-pro')
+                
+                response = await asyncio.to_thread(
+                    model.generate_content,
+                    analysis_prompt,
+                    generation_config=genai.GenerationConfig(
+                        temperature=0.1,  # Low temperature for consistent analysis
+                        top_p=0.8,
+                        top_k=40,
+                        max_output_tokens=1000,
+                    )
+                )
+                
+                if response.text:
+                    # Parse JSON response
+                    import json
+                    import re
+                    
+                    # Extract JSON from response (handle potential markdown formatting)
+                    json_match = re.search(r'\{.*\}', response.text, re.DOTALL)
+                    if json_match:
+                        ai_analysis = json.loads(json_match.group())
+                        
+                        # Validate and normalize values
+                        evidence_strength = max(1, min(10, float(ai_analysis.get('evidence_strength', 5))))
+                        case_complexity = max(0, min(100, float(ai_analysis.get('case_complexity', 50)))) / 100.0  # Convert to 0-1 scale
+                        confidence = max(0, min(100, float(ai_analysis.get('analysis_confidence', 70)))) / 100.0
+                        
+                        logger.info(f"✅ AI case facts analysis complete. Evidence: {evidence_strength}/10, Complexity: {case_complexity*100:.0f}%, Confidence: {confidence*100:.0f}%")
+                        
+                        return CaseFactsAnalysis(
+                            evidence_strength_suggested=evidence_strength,
+                            case_complexity_suggested=case_complexity,
+                            analysis_confidence=confidence,
+                            evidence_reasoning=ai_analysis.get('evidence_reasoning', 'AI analysis of evidence strength'),
+                            complexity_reasoning=ai_analysis.get('complexity_reasoning', 'AI analysis of case complexity'),
+                            key_evidence_factors=ai_analysis.get('key_evidence_factors', [])[:3],
+                            complexity_factors=ai_analysis.get('complexity_factors', [])[:3]
+                        )
+                        
+            except Exception as e:
+                logger.warning(f"⚠️ Gemini AI analysis failed: {e}")
+                
+            # Fallback to rule-based analysis if AI fails
+            return self._fallback_case_facts_analysis(case_facts, case_type)
+            
+        except Exception as e:
+            logger.error(f"❌ Case facts AI analysis failed: {e}")
+            return self._fallback_case_facts_analysis(case_facts, case_type)
+
+    def _fallback_case_facts_analysis(self, case_facts: str, case_type: str) -> CaseFactsAnalysis:
+        """
+        Fallback rule-based analysis when AI is unavailable
+        """
+        logger.info("🔄 Using fallback rule-based case facts analysis")
+        
+        # Basic rule-based analysis
+        evidence_strength = 5.0  # Default moderate evidence
+        case_complexity = 0.5   # Default moderate complexity
+        
+        case_facts_lower = case_facts.lower()
+        
+        # Evidence strength indicators
+        strong_evidence_keywords = ['contract', 'document', 'written', 'signed', 'recorded', 'witness', 'video', 'photo', 'email', 'correspondence']
+        weak_evidence_keywords = ['allegedly', 'claimed', 'disputed', 'unclear', 'ambiguous', 'hearsay', 'verbal only']
+        
+        strong_count = sum(1 for keyword in strong_evidence_keywords if keyword in case_facts_lower)
+        weak_count = sum(1 for keyword in weak_evidence_keywords if keyword in case_facts_lower)
+        
+        # Adjust evidence strength based on keywords
+        evidence_strength += (strong_count * 0.5) - (weak_count * 0.3)
+        evidence_strength = max(1.0, min(10.0, evidence_strength))
+        
+        # Complexity indicators
+        complexity_keywords = ['multiple', 'complex', 'federal', 'interstate', 'international', 'expert', 'technical', 'patent', 'regulatory']
+        simple_keywords = ['breach', 'simple', 'straightforward', 'clear', 'obvious']
+        
+        complex_count = sum(1 for keyword in complexity_keywords if keyword in case_facts_lower)
+        simple_count = sum(1 for keyword in simple_keywords if keyword in case_facts_lower)
+        
+        # Adjust complexity based on keywords and case type
+        case_complexity += (complex_count * 0.1) - (simple_count * 0.05)
+        
+        # Case type complexity adjustments
+        complexity_adjustments = {
+            'intellectual_property': 0.2,
+            'commercial': 0.15,
+            'employment': 0.1,
+            'civil': 0.0,
+            'personal_injury': -0.05
+        }
+        case_complexity += complexity_adjustments.get(case_type, 0.0)
+        case_complexity = max(0.0, min(1.0, case_complexity))
+        
+        return CaseFactsAnalysis(
+            evidence_strength_suggested=evidence_strength,
+            case_complexity_suggested=case_complexity,
+            analysis_confidence=0.6,  # Lower confidence for rule-based analysis
+            evidence_reasoning="Rule-based analysis of evidence indicators in case narrative",
+            complexity_reasoning="Rule-based analysis of complexity factors and case type",
+            key_evidence_factors=["Case narrative analysis", "Documentary evidence presence", "Factual clarity"],
+            complexity_factors=["Legal issues complexity", "Case type factors", "Procedural requirements"]
+        )
+
     def _parse_ai_analysis(self, analysis_text: str, source: str) -> Dict[str, Any]:
         """Parse AI analysis text into structured data"""
         # This is a simplified parser - in production, you'd want more sophisticated NLP
