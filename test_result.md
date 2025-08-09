@@ -278,6 +278,59 @@ IMPLEMENTATION COMPLETED:
 READY FOR TESTING: All backend endpoints enhanced with web search capabilities and frontend updated to display reference links and handle no-information cases appropriately."
 
 backend:
+  - task: "Appeal Analysis AI Fallback Issue Fix - Task 1"
+    implemented: true
+    working: false
+    file: "/app/backend/litigation_analytics_engine.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: false
+        -agent: "user"
+        -comment: "USER REPORTED CRITICAL ISSUE: Appeal analysis returns 'AI analysis unavailable - using enhanced default factors' and 'AI analysis unavailable - using enhanced default measures' instead of proper AI-powered analysis of detailed case facts. System has two modes but incorrectly falls back to default mode instead of using full AI analysis of case narrative."
+        -working: true
+        -agent: "main"
+        -comment: "🔧 TASK 1 FIX IMPLEMENTED - AI ANALYSIS FALLBACK ISSUE: Enhanced Litigation Analytics Engine to properly utilize detailed case facts for AI analysis. CRITICAL IMPROVEMENTS: 1) Enhanced LitigationAnalyticsEngine.__init__ with proper API key validation and error handling for Gemini/Groq initialization, 2) Improved _build_appeal_analysis_prompt to include detailed case facts and legal issues in prompt (was missing before - critical for AI mode), 3) Enhanced _get_ai_appeal_analysis with comprehensive error handling, detailed logging, and mode flags to differentiate between full AI analysis vs fallback, 4) Added ai_analysis_mode flags ('full_ai_analysis' vs 'fallback_default') and improved confidence scoring (90% for AI analysis vs 65% for fallback). EXPECTED: AI should now properly parse detailed case facts instead of falling back to generic defaults. Ready for testing with user's exact case scenario."
+
+  - task: "Evidence/Complexity Correlation Fix - Task 2"
+    implemented: false
+    working: "NA"
+    file: "/app/backend/litigation_analytics_engine.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "TASK 2 - PENDING: Fix evidence strength and complexity correlation with case narrative. Will implement after Task 1 testing is complete."
+
+  - task: "Cost Estimation & Risk Threshold Fix - Task 3"
+    implemented: false
+    working: "NA"
+    file: "/app/backend/litigation_analytics_engine.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "TASK 3 - PENDING: Fix cost estimation model and risk threshold labeling issues. Will implement after Task 1 and 2 are complete."
+
+metadata:
+  created_by: "main_agent"
+  version: "1.1"
+  test_sequence: 1
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "Appeal Analysis AI Fallback Issue Fix - Task 1"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "ai_fallback_fix_first"
+
+agent_communication:
   - task: "Appeal Probability Analysis Endpoints Fix"
     implemented: true
     working: true
