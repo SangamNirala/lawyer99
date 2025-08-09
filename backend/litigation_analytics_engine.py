@@ -538,10 +538,10 @@ class LitigationAnalyticsEngine:
     def _get_outcome_appeal_multiplier(self, predicted_outcome: str) -> float:
         """Get appeal probability multiplier based on predicted outcome"""
         multipliers = {
-            "plaintiff_win": 2.8,    # Defendants more likely to appeal losses
-            "defendant_win": 0.8,    # Plaintiffs less likely to appeal (cost considerations)
+            "plaintiff_win": 1.8,    # Defendants more likely to appeal losses (reduced from 2.8)
+            "defendant_win": 0.7,    # Plaintiffs less likely to appeal (cost considerations)
             "settlement": 0.2,       # Very low appeal probability for settlements
-            "dismissed": 1.5         # Moderate appeal probability for dismissals
+            "dismissed": 1.3         # Moderate appeal probability for dismissals (reduced from 1.5)
         }
         return multipliers.get(predicted_outcome, 1.0)
 
