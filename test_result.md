@@ -178,8 +178,8 @@ USER REPORTED CRITICAL PROBLEMS WITH APPEAL ANALYSIS:
 
 CURRENT TASK SEQUENCE (ONE AT A TIME):
 ✅ TASK 1: Fix AI analysis fallback issue - enable proper NLP parsing of case facts using Gemini/Groq
-⏳ TASK 2: Improve evidence strength and complexity correlation with case narrative
-⏳ TASK 3: Fix cost estimation model and risk threshold labeling
+✅ TASK 2: Improve evidence strength and complexity correlation with case narrative
+✅ TASK 3: Fix cost estimation model and risk threshold labeling
 
 PREVIOUS USER ISSUE (RESOLVED) - APPEAL PROBABILITY ANALYSIS ERROR:
 
