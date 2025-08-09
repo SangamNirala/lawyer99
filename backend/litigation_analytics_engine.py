@@ -872,8 +872,76 @@ class LitigationAnalyticsEngine:
             "florida": 0.14,     # Florida appeal rate
             "illinois": 0.17     # Illinois appeal rate
         }
-        
         return appeal_rates.get(jurisdiction.lower(), 0.15)
+    
+    def _generate_default_appeal_factors(self, case_data: CaseData, predicted_outcome: str, appeal_probability: float) -> List[str]:
+        """Generate contextual appeal factors when AI analysis is unavailable"""
+        factors = []
+        
+        # Add outcome-based factor
+        if predicted_outcome == "plaintiff_win":
+            factors.append("Defendant likely to appeal unfavorable judgment")
+        elif predicted_outcome == "defendant_win":
+            factors.append("Plaintiff may appeal adverse ruling if significant damages at stake")
+        elif predicted_outcome == "dismissed":
+            factors.append("Plaintiff may appeal dismissal on procedural or legal grounds")
+        else:
+            factors.append(f"Case outcome: {predicted_outcome.replace('_', ' ').title()}")
+        
+        # Add value-based factor
+        if case_data.case_value:
+            if case_data.case_value >= 1000000:
+                factors.append(f"High case value (${case_data.case_value:,.0f}) increases appeal likelihood")
+            elif case_data.case_value >= 500000:
+                factors.append(f"Significant case value (${case_data.case_value:,.0f}) warrants appeal consideration")
+            else:
+                factors.append(f"Case value (${case_data.case_value:,.0f}) may limit appeal attractiveness")
+        
+        # Add evidence-based factor
+        if case_data.evidence_strength:
+            evidence_score = case_data.evidence_strength / 10.0 if case_data.evidence_strength > 1 else case_data.evidence_strength
+            if evidence_score < 0.4:
+                factors.append("Weak evidence strength creates potential appeal grounds")
+            elif evidence_score < 0.7:
+                factors.append("Moderate evidence strength allows for appeal consideration")
+            else:
+                factors.append("Strong evidence may discourage appeals")
+        
+        # Add complexity factor
+        if case_data.case_complexity and case_data.case_complexity > 0.6:
+            factors.append("High case complexity creates multiple potential appeal issues")
+        
+        # Add jurisdictional factor
+        jurisdiction_name = case_data.jurisdiction.replace('_', ' ').title()
+        factors.append(f"{jurisdiction_name} jurisdiction has {self._get_jurisdictional_appeal_statistics(case_data.jurisdiction)*100:.0f}% appeal rate")
+        
+        return factors[:5]
+    
+    def _generate_default_preventive_measures(self, case_data: CaseData, predicted_outcome: str) -> List[str]:
+        """Generate contextual preventive measures when AI analysis is unavailable"""
+        measures = [
+            "Maintain comprehensive trial record with detailed objections and rulings",
+            "Prepare thorough post-trial motions to address potential appeal grounds"
+        ]
+        
+        # Add outcome-specific measures
+        if predicted_outcome == "plaintiff_win":
+            measures.append("Ensure judgment is well-supported by evidence and legal precedent")
+        elif predicted_outcome == "defendant_win":
+            measures.append("Document strong legal basis for defense verdict")
+        elif predicted_outcome == "dismissed":
+            measures.append("Ensure dismissal follows proper procedural requirements")
+        
+        # Add case-specific measures
+        if case_data.case_value and case_data.case_value >= 1000000:
+            measures.append("Consider settlement negotiations to avoid costly appeal process")
+        
+        if case_data.case_complexity and case_data.case_complexity > 0.6:
+            measures.append("Retain experienced appellate counsel for complex legal issues")
+        
+        measures.append("Document all legal arguments and supporting authorities thoroughly")
+        
+        return measures[:5]
 
     def _parse_ai_analysis(self, analysis_text: str, source: str) -> Dict[str, Any]:
         """Parse AI analysis text into structured data"""
