@@ -71,6 +71,18 @@ class CaseData:
     settlement_offers: List[float] = field(default_factory=list)
 
 @dataclass
+class AppealAnalysis:
+    """Structure for appeal probability analysis"""
+    appeal_probability: float
+    appeal_confidence: float
+    appeal_factors: List[str] = field(default_factory=list)
+    appeal_timeline: Optional[int] = None  # days to file appeal
+    appeal_cost_estimate: Optional[float] = None
+    appeal_success_probability: Optional[float] = None
+    preventive_measures: List[str] = field(default_factory=list)
+    jurisdictional_appeal_rate: Optional[float] = None
+
+@dataclass
 class PredictionResult:
     """Structure for case outcome predictions"""
     case_id: str
@@ -84,6 +96,7 @@ class PredictionResult:
     risk_factors: List[str] = field(default_factory=list)
     success_factors: List[str] = field(default_factory=list)
     recommendations: List[str] = field(default_factory=list)
+    appeal_analysis: Optional[AppealAnalysis] = None  # NEW: Appeal probability analysis
     prediction_date: datetime = field(default_factory=datetime.utcnow)
 
 @dataclass
