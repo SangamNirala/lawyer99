@@ -155,8 +155,8 @@ def test_appeal_analysis_evidence_complexity_correlation():
             test_results.append(complexity_independent)
             
             # CRITICAL TEST 3: Check reasoning fields for actual AI analysis
-            evidence_reasoning = case_facts_analysis.get('evidence_strength_reasoning', '')
-            complexity_reasoning = case_facts_analysis.get('case_complexity_reasoning', '')
+            evidence_reasoning = case_facts_analysis.get('evidence_reasoning', '')
+            complexity_reasoning = case_facts_analysis.get('complexity_reasoning', '')
             
             print(f"\n🧠 AI REASONING ANALYSIS:")
             print(f"Evidence Reasoning Length: {len(evidence_reasoning)} characters")
