@@ -524,10 +524,15 @@ class LitigationAnalyticsEngine:
             # Get jurisdictional appeal rate for comparison
             jurisdictional_rate = self._get_jurisdictional_appeal_statistics(case_data.jurisdiction)
             
-            # Combine all analysis
+            # Combine all analysis and adjust confidence based on AI analysis success
+            ai_analysis_mode = ai_appeal_analysis.get("ai_analysis_mode", "fallback_default")
+            appeal_confidence = 0.90 if ai_analysis_mode == "full_ai_analysis" else 0.65  # Higher confidence with AI analysis
+            
+            logger.info(f"✅ Appeal analysis complete. Mode: {ai_analysis_mode}, Confidence: {appeal_confidence:.0%}")
+            
             return AppealAnalysis(
                 appeal_probability=appeal_probability,
-                appeal_confidence=0.85,  # High confidence in appeal prediction
+                appeal_confidence=appeal_confidence,
                 appeal_factors=ai_appeal_analysis.get("appeal_factors", 
                     self._generate_default_appeal_factors(case_data, predicted_outcome, appeal_probability)
                 )[:5],
