@@ -7,7 +7,7 @@ def test_scenario(name, case_data, expected_evidence_range, expected_complexity_
     print(f"\n🧪 TESTING: {name}")
     print("-" * 60)
     
-    url = "https://b3d0e54e-8004-47d5-83bd-25e76a95a599.preview.emergentagent.com/api/litigation/appeal-analysis"
+    url = "https://8cd68d5c-4981-470b-b1c0-9982d2b4a8d2.preview.emergentagent.com/api/litigation/appeal-analysis"
     response = requests.post(url, json=case_data, timeout=60)
     
     if response.status_code == 200:

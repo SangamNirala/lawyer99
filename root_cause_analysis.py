@@ -15,7 +15,7 @@ import uuid
 from datetime import datetime
 
 class RootCauseAnalyzer:
-    def __init__(self, base_url="https://b3d0e54e-8004-47d5-83bd-25e76a95a599.preview.emergentagent.com"):
+    def __init__(self, base_url="https://8cd68d5c-4981-470b-b1c0-9982d2b4a8d2.preview.emergentagent.com"):
         self.base_url = base_url
         self.api_url = f"{base_url}/api"
         self.tests_run = 0

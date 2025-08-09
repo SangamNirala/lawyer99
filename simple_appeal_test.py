@@ -14,7 +14,7 @@ user_case = {
     "case_facts": "Plaintiff alleges breach of contract by a federal contractor involving delayed delivery of critical medical equipment. The agreement stipulated delivery within 30 days, but actual delivery occurred after 90 days, causing significant financial loss to the plaintiff's hospital operations. Defendant claims delays were due to unforeseen supply chain disruptions caused by international shipping restrictions. Evidence includes signed contracts, delivery logs, and email correspondence between parties."
 }
 
-url = "https://b3d0e54e-8004-47d5-83bd-25e76a95a599.preview.emergentagent.com/api/litigation/appeal-analysis"
+url = "https://8cd68d5c-4981-470b-b1c0-9982d2b4a8d2.preview.emergentagent.com/api/litigation/appeal-analysis"
 response = requests.post(url, json=user_case, timeout=120)
 
 print("🎯 APPEAL ANALYSIS TASK 2 & TASK 3 TESTING RESULTS")
