@@ -466,8 +466,8 @@ class LitigationAnalyticsEngine:
             # Factor 6: Judge-Specific Appeal Pattern
             judge_multiplier = self._get_judge_appeal_multiplier(judge_insights)
             
-            # Factor 7: Confidence Score Impact (low confidence = higher appeal probability)
-            confidence_multiplier = 1.0 + (0.5 * (1.0 - confidence_score))
+            # Factor 7: Confidence Score Impact (low confidence = higher appeal probability, reduced impact)
+            confidence_multiplier = 1.0 + (0.3 * (1.0 - confidence_score))  # Reduced from 0.5 to 0.3
             
             # Calculate combined appeal probability
             appeal_probability = base_appeal_prob * outcome_multiplier * value_multiplier * \
