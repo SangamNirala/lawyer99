@@ -14346,6 +14346,9 @@ if LITIGATION_ANALYTICS_AVAILABLE:
                 {"$sort": {"count": -1}}
             ]).to_list(10)
             
+            # Appeal Analytics (NEW)
+            appeal_analytics = await _get_appeal_analytics()
+            
             return {
                 "overview": {
                     "total_cases_analyzed": total_cases,
@@ -14364,6 +14367,7 @@ if LITIGATION_ANALYTICS_AVAILABLE:
                     "by_case_type": [{"case_type": stat["_id"], "count": stat["count"]} for stat in case_type_stats],
                     "by_jurisdiction": [{"jurisdiction": stat["_id"], "count": stat["count"]} for stat in jurisdiction_stats]
                 },
+                "appeal_analytics": appeal_analytics,  # NEW: Appeal-specific metrics
                 "timestamp": datetime.utcnow().isoformat()
             }
             
