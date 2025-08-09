@@ -14298,7 +14298,8 @@ if LITIGATION_ANALYTICS_AVAILABLE:
         """
         Get comprehensive litigation analytics dashboard data
         
-        Provides overview statistics and metrics for the litigation analytics system
+        Provides overview statistics and metrics for the litigation analytics system,
+        including appeal probability analytics
         """
         try:
             logger.info("📊 Fetching litigation analytics dashboard data")
