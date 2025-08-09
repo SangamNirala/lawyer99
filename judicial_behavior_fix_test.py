@@ -32,7 +32,7 @@ from typing import Dict, Any, List
 class JudicialBehaviorFixTester:
     def __init__(self):
         # Use the production backend URL from frontend/.env
-        self.base_url = "https://027a3f35-a0bc-40cd-ad79-483d46c6126e.preview.emergentagent.com/api"
+        self.base_url = "https://d7a1dca3-54ad-4826-aadd-9f393fe0628b.preview.emergentagent.com/api"
         self.session = requests.Session()
         self.session.headers.update({
             'Content-Type': 'application/json',
