@@ -1612,7 +1612,7 @@ const AppealAnalysis = () => {
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <BarChart3 className="h-5 w-5" />
-              <span>Appeal Risk Assessment</span>
+              <span>Appeal Risk Analysis</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
