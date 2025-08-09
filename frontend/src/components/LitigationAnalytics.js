@@ -431,7 +431,7 @@ const CaseOutcomePredictor = ({ onPredictionComplete }) => {
                     <div className="text-2xl font-bold text-orange-900">
                       {(prediction.appeal_analysis.appeal_probability * 100).toFixed(1)}%
                     </div>
-                    <div className="text-sm text-orange-600">Appeal Probability</div>
+                    <div className="text-sm text-orange-600">Likelihood of Appeal Being Filed</div>
                     <Progress value={prediction.appeal_analysis.appeal_probability * 100} className="mt-2 h-2" />
                   </div>
 
