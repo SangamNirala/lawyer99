@@ -13678,6 +13678,20 @@ if LITIGATION_ANALYTICS_AVAILABLE:
                     "high": prediction_result.settlement_range[1]
                 }
             
+            # Convert appeal analysis if available
+            appeal_analysis_data = None
+            if prediction_result.appeal_analysis:
+                appeal_analysis_data = AppealAnalysisData(
+                    appeal_probability=prediction_result.appeal_analysis.appeal_probability,
+                    appeal_confidence=prediction_result.appeal_analysis.appeal_confidence,
+                    appeal_factors=prediction_result.appeal_analysis.appeal_factors,
+                    appeal_timeline=prediction_result.appeal_analysis.appeal_timeline,
+                    appeal_cost_estimate=prediction_result.appeal_analysis.appeal_cost_estimate,
+                    appeal_success_probability=prediction_result.appeal_analysis.appeal_success_probability,
+                    preventive_measures=prediction_result.appeal_analysis.preventive_measures,
+                    jurisdictional_appeal_rate=prediction_result.appeal_analysis.jurisdictional_appeal_rate
+                )
+            
             return CaseAnalysisResponse(
                 case_id=prediction_result.case_id,
                 predicted_outcome=prediction_result.predicted_outcome.value,
@@ -13690,6 +13704,7 @@ if LITIGATION_ANALYTICS_AVAILABLE:
                 risk_factors=prediction_result.risk_factors,
                 success_factors=prediction_result.success_factors,
                 recommendations=prediction_result.recommendations,
+                appeal_analysis=appeal_analysis_data,
                 prediction_date=prediction_result.prediction_date.isoformat()
             )
             
