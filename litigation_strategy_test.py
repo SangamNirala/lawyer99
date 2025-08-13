@@ -36,7 +36,7 @@ from datetime import datetime
 from typing import Dict, Any, List
 
 # Backend URL from environment
-BACKEND_URL = "https://legalcore.preview.emergentagent.com/api"
+BACKEND_URL = "https://legal-engine-check.preview.emergentagent.com/api"
 
 def test_litigation_strategy_optimizer():
     """Test the AI-Powered Litigation Strategy Optimizer with exact user data"""
