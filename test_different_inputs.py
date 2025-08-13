@@ -8,7 +8,7 @@ import json
 import sys
 
 # Backend URL from environment
-BACKEND_URL = "https://legal-engine-check.preview.emergentagent.com/api"
+BACKEND_URL = "https://legalmate-research.preview.emergentagent.com/api"
 
 def test_with_different_inputs():
     """Test with different user input values"""
