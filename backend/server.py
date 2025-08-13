@@ -5714,22 +5714,39 @@ async def generate_research_memo(request: MemoGenerationRequest):
             format_style=request.format_style
         )
         
-        # Store memo in database
+        # Extract content from memo result structure 
+        # The memo generator returns a nested structure, we need to flatten it for the API response
+        quality_metrics = memo_result.get("quality_metrics", {})
+        metadata = memo_result.get("metadata", {})
+        
+        # Create the complete memo content by combining sections
+        memo_sections_content = ""
+        for section in memo_result.get("memo_sections", []):
+            memo_sections_content += f"\n\n{section.get('title', '')}\n{section.get('content', '')}"
+        
+        full_memo_content = f"{memo_result.get('title', '')}\n\n{memo_result.get('executive_summary', '')}{memo_sections_content}\n\n{memo_result.get('conclusion', '')}"
+        
+        # Store memo in database with correct field mapping
         memo_doc = {
-            "id": memo_result["id"],
+            "id": memo_result.get("memo_id", str(uuid.uuid4())),  # Map memo_id to id
             "research_query": request.memo_data.get("query", ""),
             "memo_type": request.memo_type,
-            "generated_memo": memo_result["content"],
-            "memo_structure": memo_result.get("structure", {}),
+            "generated_memo": full_memo_content,  # Combined content
+            "memo_structure": {
+                "title": memo_result.get("title", ""),
+                "executive_summary": memo_result.get("executive_summary", ""),
+                "conclusion": memo_result.get("conclusion", ""),
+                "recommendations": str(memo_result.get("recommendations", ""))
+            },
             "supporting_cases": memo_result.get("supporting_cases", []),
             "legal_authorities": memo_result.get("legal_authorities", []),
-            "confidence_rating": memo_result.get("confidence_rating", 0.0),
-            "ai_quality_score": memo_result.get("ai_quality_score", 0.0),
-            "completeness_score": memo_result.get("completeness_score", 0.0),
-            "auto_validation_status": memo_result.get("auto_validation_status", "needs_review"),
-            "word_count": len(memo_result["content"].split()),
-            "reading_time_estimate": len(memo_result["content"].split()) // 200,  # ~200 words per minute
-            "export_formats": ["pdf", "docx", "html"],
+            "confidence_rating": quality_metrics.get("confidence_rating", 0.0),
+            "ai_quality_score": quality_metrics.get("ai_quality_score", 0.0),
+            "completeness_score": quality_metrics.get("completeness_score", 0.0),
+            "auto_validation_status": quality_metrics.get("validation_status", "needs_review"),
+            "word_count": metadata.get("word_count", len(full_memo_content.split())),
+            "reading_time_estimate": metadata.get("reading_time_estimate", len(full_memo_content.split()) // 200),
+            "export_formats": metadata.get("export_formats", ["pdf", "docx", "html"]),
             "created_at": datetime.utcnow()
         }
         
