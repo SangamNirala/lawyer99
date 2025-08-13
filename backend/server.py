@@ -5438,6 +5438,529 @@ async def get_contract_legal_insights(request: dict):
 
 
 # ================================
+# ADVANCED LEGAL RESEARCH ENGINE API ENDPOINTS
+# ================================
+
+# Initialize Advanced Legal Research Engine components
+try:
+    from advanced_legal_research_engine import get_research_engine
+    from precedent_matching_system import get_precedent_matcher
+    from citation_network_analyzer import CitationNetworkAnalyzer
+    from research_memo_generator import ResearchMemoGenerator
+    from legal_argument_structurer import LegalArgumentStructurer
+    from multi_jurisdiction_search import MultiJurisdictionSearch
+    from research_quality_scorer import get_quality_scorer
+    ADVANCED_RESEARCH_ENGINE_AVAILABLE = True
+    logger.info("✅ Advanced Legal Research Engine modules loaded successfully")
+except ImportError as e:
+    logger.warning(f"⚠️ Advanced Legal Research Engine not fully available: {e}")
+    ADVANCED_RESEARCH_ENGINE_AVAILABLE = False
+
+@api_router.post("/legal-research-engine/research", response_model=ResearchResultResponse)
+async def coordinate_legal_research(request: ResearchQueryRequest):
+    """
+    Main Advanced Legal Research Engine endpoint - coordinates comprehensive research
+    across all components (precedent matching, citation analysis, memo generation, etc.)
+    """
+    try:
+        if not ADVANCED_RESEARCH_ENGINE_AVAILABLE:
+            raise HTTPException(status_code=503, detail="Advanced Legal Research Engine not available")
+        
+        logger.info(f"🔍 Starting comprehensive legal research: {request.research_type}")
+        
+        # Get the research engine
+        engine = await get_research_engine()
+        
+        # Create research query from request
+        from advanced_legal_research_engine import ResearchQuery, ResearchType, ResearchPriority
+        
+        research_query = ResearchQuery(
+            query_text=request.query_text,
+            research_type=ResearchType(request.research_type),
+            jurisdiction=request.jurisdiction,
+            legal_domain=request.legal_domain,
+            priority=ResearchPriority(request.priority),
+            court_level=request.court_level,
+            date_range=request.date_range,
+            case_type=request.case_type,
+            legal_issues=request.legal_issues,
+            max_results=request.max_results,
+            min_confidence=request.min_confidence,
+            include_analysis=request.include_analysis,
+            cache_results=request.cache_results,
+            user_context=request.user_context
+        )
+        
+        # Execute comprehensive research
+        result = await engine.coordinate_research(research_query)
+        
+        # Store research session in database
+        research_doc = asdict(result)
+        research_doc["_id"] = result.id
+        await db.legal_research_queries.insert_one(research_doc)
+        
+        logger.info(f"✅ Research completed: {result.sources_count} sources, confidence: {result.confidence_score:.2f}")
+        
+        # Convert result to response format
+        precedent_matches = []
+        for match in result.precedent_matches:
+            if isinstance(match, dict):
+                # Convert dict to PrecedentMatchResponse format
+                precedent_matches.append(PrecedentMatchResponse(
+                    case_id=match.get("case_id", ""),
+                    case_title=match.get("case_title", ""),
+                    citation=match.get("citation", ""),
+                    court=match.get("court", ""),
+                    jurisdiction=match.get("jurisdiction", ""),
+                    decision_date=match.get("decision_date"),
+                    case_summary=match.get("case_summary", ""),
+                    legal_issues=match.get("legal_issues", []),
+                    holdings=match.get("holdings", []),
+                    key_facts=match.get("key_facts", []),
+                    similarity_scores=SimilarityScoreResponse(
+                        factual_similarity=match.get("similarity_scores", {}).get("factual_similarity", 0.0),
+                        legal_similarity=match.get("similarity_scores", {}).get("legal_similarity", 0.0),
+                        procedural_similarity=match.get("similarity_scores", {}).get("procedural_similarity", 0.0),
+                        jurisdictional_similarity=match.get("similarity_scores", {}).get("jurisdictional_similarity", 0.0),
+                        temporal_similarity=match.get("similarity_scores", {}).get("temporal_similarity", 0.0),
+                        overall_similarity=match.get("similarity_scores", {}).get("overall_similarity", 0.0),
+                        confidence_score=match.get("similarity_scores", {}).get("confidence_score", 0.0)
+                    ),
+                    match_type=match.get("match_type", "moderately_similar"),
+                    relevance_score=match.get("relevance_score", 0.0),
+                    extracted_principles=[],
+                    citation_count=match.get("citation_count", 0),
+                    authority_score=match.get("authority_score", 0.0),
+                    match_reasoning=match.get("match_reasoning", ""),
+                    distinguishing_factors=match.get("distinguishing_factors", []),
+                    supporting_quotes=match.get("supporting_quotes", []),
+                    created_at=match.get("created_at", datetime.utcnow())
+                ))
+        
+        return ResearchResultResponse(
+            id=result.id,
+            query_id=result.query_id,
+            research_type=result.research_type.value,
+            results=result.results,
+            precedent_matches=precedent_matches,
+            citation_network=result.citation_network,
+            generated_memo=result.generated_memo,
+            legal_arguments=result.legal_arguments,
+            confidence_score=result.confidence_score,
+            completeness_score=result.completeness_score,
+            authority_score=result.authority_score,
+            processing_time=result.processing_time,
+            models_used=result.models_used,
+            sources_count=result.sources_count,
+            status=result.status.value,
+            created_at=result.created_at,
+            updated_at=result.updated_at,
+            expires_at=result.expires_at
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Error in comprehensive legal research: {e}")
+        raise HTTPException(status_code=500, detail=f"Error conducting research: {str(e)}")
+
+@api_router.post("/legal-research-engine/precedent-search", response_model=List[PrecedentMatchResponse])
+async def search_precedents(request: PrecedentSearchRequest):
+    """AI-powered precedent matching with multi-dimensional similarity analysis"""
+    try:
+        if not ADVANCED_RESEARCH_ENGINE_AVAILABLE:
+            raise HTTPException(status_code=503, detail="Precedent matching system not available")
+        
+        logger.info("🔍 Starting precedent search...")
+        
+        # Get precedent matcher
+        matcher = await get_precedent_matcher()
+        
+        # Execute precedent search
+        matches = await matcher.find_similar_cases(
+            query_case=request.query_case,
+            filters=request.filters
+        )
+        
+        # Convert to response format
+        response_matches = []
+        for match in matches:
+            response_matches.append(PrecedentMatchResponse(
+                case_id=match.case_id,
+                case_title=match.case_title,
+                citation=match.citation,
+                court=match.court,
+                jurisdiction=match.jurisdiction,
+                decision_date=match.decision_date,
+                case_summary=match.case_summary,
+                legal_issues=match.legal_issues,
+                holdings=match.holdings,
+                key_facts=match.key_facts,
+                similarity_scores=SimilarityScoreResponse(
+                    factual_similarity=match.similarity_scores.factual_similarity,
+                    legal_similarity=match.similarity_scores.legal_similarity,
+                    procedural_similarity=match.similarity_scores.procedural_similarity,
+                    jurisdictional_similarity=match.similarity_scores.jurisdictional_similarity,
+                    temporal_similarity=match.similarity_scores.temporal_similarity,
+                    overall_similarity=match.similarity_scores.overall_similarity,
+                    confidence_score=match.similarity_scores.confidence_score
+                ),
+                match_type=match.match_type.value,
+                relevance_score=match.relevance_score,
+                extracted_principles=[
+                    LegalPrincipleResponse(
+                        id=principle.id,
+                        principle_text=principle.principle_text,
+                        legal_domain=principle.legal_domain,
+                        authority_level=principle.authority_level,
+                        jurisdiction=principle.jurisdiction,
+                        source_case=principle.source_case,
+                        confidence_score=principle.confidence_score,
+                        supporting_citations=principle.supporting_citations,
+                        created_at=principle.created_at
+                    ) for principle in match.extracted_principles
+                ],
+                citation_count=match.citation_count,
+                authority_score=match.authority_score,
+                match_reasoning=match.match_reasoning,
+                distinguishing_factors=match.distinguishing_factors,
+                supporting_quotes=match.supporting_quotes,
+                created_at=match.created_at
+            ))
+        
+        logger.info(f"✅ Found {len(response_matches)} precedent matches")
+        return response_matches
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Error in precedent search: {e}")
+        raise HTTPException(status_code=500, detail=f"Error searching precedents: {str(e)}")
+
+@api_router.post("/legal-research-engine/citation-analysis", response_model=CitationNetworkResponse)
+async def analyze_citation_network(request: CitationAnalysisRequest):
+    """Build and analyze citation networks with authority scoring"""
+    try:
+        if not ADVANCED_RESEARCH_ENGINE_AVAILABLE:
+            raise HTTPException(status_code=503, detail="Citation network analyzer not available")
+        
+        logger.info("📊 Starting citation network analysis...")
+        
+        # Initialize citation analyzer
+        analyzer = CitationNetworkAnalyzer()
+        await analyzer.initialize()
+        
+        # Build citation network
+        network = await analyzer.build_citation_network(
+            cases=request.cases,
+            depth=request.depth,
+            jurisdiction_filter=request.jurisdiction_filter
+        )
+        
+        # Convert to response format
+        return CitationNetworkResponse(
+            network_id=network["network_id"],
+            total_nodes=network["total_nodes"],
+            total_edges=network["total_edges"],
+            network_density=network["network_density"],
+            average_path_length=network["average_path_length"],
+            clustering_coefficient=network["clustering_coefficient"],
+            landmark_cases=network["landmark_cases"],
+            authority_ranking=network["authority_ranking"],
+            legal_evolution_chains=network["legal_evolution_chains"],
+            overruling_relationships=network["overruling_relationships"],
+            jurisdiction_scope=network["jurisdiction_scope"],
+            analysis_timestamp=datetime.fromisoformat(network["analysis_timestamp"])
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Error in citation analysis: {e}")
+        raise HTTPException(status_code=500, detail=f"Error analyzing citations: {str(e)}")
+
+@api_router.post("/legal-research-engine/generate-memo", response_model=ResearchMemoResponse)
+async def generate_research_memo(request: MemoGenerationRequest):
+    """Generate comprehensive legal research memorandums using IRAC methodology"""
+    try:
+        if not ADVANCED_RESEARCH_ENGINE_AVAILABLE:
+            raise HTTPException(status_code=503, detail="Research memo generator not available")
+        
+        logger.info("📝 Generating legal research memo...")
+        
+        # Initialize memo generator
+        generator = ResearchMemoGenerator()
+        await generator.initialize()
+        
+        # Generate memo
+        memo_result = await generator.generate_research_memo(
+            memo_data=request.memo_data,
+            memo_type=request.memo_type,
+            format_style=request.format_style
+        )
+        
+        # Store memo in database
+        memo_doc = {
+            "id": memo_result["id"],
+            "research_query": request.memo_data.get("query", ""),
+            "memo_type": request.memo_type,
+            "generated_memo": memo_result["content"],
+            "memo_structure": memo_result.get("structure", {}),
+            "supporting_cases": memo_result.get("supporting_cases", []),
+            "legal_authorities": memo_result.get("legal_authorities", []),
+            "confidence_rating": memo_result.get("confidence_rating", 0.0),
+            "ai_quality_score": memo_result.get("ai_quality_score", 0.0),
+            "completeness_score": memo_result.get("completeness_score", 0.0),
+            "auto_validation_status": memo_result.get("auto_validation_status", "needs_review"),
+            "word_count": len(memo_result["content"].split()),
+            "reading_time_estimate": len(memo_result["content"].split()) // 200,  # ~200 words per minute
+            "export_formats": ["pdf", "docx", "html"],
+            "created_at": datetime.utcnow()
+        }
+        
+        await db.research_memos.insert_one(memo_doc)
+        
+        return ResearchMemoResponse(**memo_doc)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Error generating research memo: {e}")
+        raise HTTPException(status_code=500, detail=f"Error generating memo: {str(e)}")
+
+@api_router.post("/legal-research-engine/structure-arguments", response_model=LegalArgumentResponse)
+async def structure_legal_arguments(request: LegalArgumentRequest):
+    """AI-powered legal argument construction with precedent support"""
+    try:
+        if not ADVANCED_RESEARCH_ENGINE_AVAILABLE:
+            raise HTTPException(status_code=503, detail="Legal argument structurer not available")
+        
+        logger.info("⚖️ Structuring legal arguments...")
+        
+        # Initialize argument structurer
+        structurer = LegalArgumentStructurer()
+        await structurer.initialize()
+        
+        # Structure arguments
+        argument_result = await structurer.structure_legal_arguments(
+            argument_data=request.argument_data,
+            argument_strength=request.argument_strength,
+            include_counterarguments=request.include_counterarguments
+        )
+        
+        return LegalArgumentResponse(
+            id=argument_result.get("id", str(uuid.uuid4())),
+            legal_question=request.argument_data.get("legal_question", ""),
+            argument_structure=argument_result.get("structure", {}),
+            supporting_precedents=argument_result.get("supporting_precedents", []),
+            counterarguments=argument_result.get("counterarguments", []),
+            argument_strength_score=argument_result.get("strength_score", 0.0),
+            persuasiveness_rating=argument_result.get("persuasiveness_rating", 0.0),
+            confidence_score=argument_result.get("confidence_score", 0.0),
+            jurisdiction=request.argument_data.get("jurisdiction", "US"),
+            case_type=request.argument_data.get("case_type", ""),
+            created_at=datetime.utcnow()
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Error structuring legal arguments: {e}")
+        raise HTTPException(status_code=500, detail=f"Error structuring arguments: {str(e)}")
+
+@api_router.post("/legal-research-engine/multi-jurisdiction-search")
+async def multi_jurisdiction_search(request: MultiJurisdictionRequest):
+    """Cross-jurisdictional legal research with comparison analysis"""
+    try:
+        if not ADVANCED_RESEARCH_ENGINE_AVAILABLE:
+            raise HTTPException(status_code=503, detail="Multi-jurisdiction search not available")
+        
+        logger.info("🌐 Starting multi-jurisdiction search...")
+        
+        # Initialize multi-jurisdiction searcher
+        searcher = MultiJurisdictionSearch()
+        await searcher.initialize()
+        
+        # Execute search across jurisdictions
+        results = await searcher.search_across_jurisdictions(
+            query=request.query,
+            jurisdictions=request.jurisdictions,
+            legal_domain=request.legal_domain,
+            comparison_mode=request.comparison_mode
+        )
+        
+        return {
+            "query": request.query,
+            "jurisdictions_searched": request.jurisdictions,
+            "results": results,
+            "comparison_analysis": results.get("comparison", {}),
+            "jurisdiction_recommendations": results.get("recommendations", []),
+            "total_results": len(results.get("results", [])),
+            "search_timestamp": datetime.utcnow()
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Error in multi-jurisdiction search: {e}")
+        raise HTTPException(status_code=500, detail=f"Error searching jurisdictions: {str(e)}")
+
+@api_router.post("/legal-research-engine/quality-assessment", response_model=QualityAssessmentResponse)
+async def assess_research_quality(request: QualityAssessmentRequest):
+    """AI-powered research quality assessment and enhancement recommendations"""
+    try:
+        if not ADVANCED_RESEARCH_ENGINE_AVAILABLE:
+            raise HTTPException(status_code=503, detail="Research quality scorer not available")
+        
+        logger.info("🎯 Starting research quality assessment...")
+        
+        # Get quality scorer
+        scorer = await get_quality_scorer()
+        
+        # Assess research quality
+        assessment = await scorer.assess_research_quality(request.research_data)
+        
+        return QualityAssessmentResponse(**assessment)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Error in quality assessment: {e}")
+        raise HTTPException(status_code=500, detail=f"Error assessing quality: {str(e)}")
+
+@api_router.get("/legal-research-engine/research-status/{research_id}", response_model=ResearchStatusResponse)
+async def get_research_status(research_id: str):
+    """Get status of a research operation"""
+    try:
+        if not ADVANCED_RESEARCH_ENGINE_AVAILABLE:
+            raise HTTPException(status_code=503, detail="Advanced Legal Research Engine not available")
+        
+        # Get the research engine
+        engine = await get_research_engine()
+        
+        # Get research status
+        status = await engine.get_research_status(research_id)
+        
+        return ResearchStatusResponse(**status)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Error getting research status: {e}")
+        raise HTTPException(status_code=500, detail=f"Error getting status: {str(e)}")
+
+@api_router.get("/legal-research-engine/stats")
+async def get_research_engine_stats():
+    """Get comprehensive Advanced Legal Research Engine statistics"""
+    try:
+        if not ADVANCED_RESEARCH_ENGINE_AVAILABLE:
+            return {"status": "unavailable", "message": "Advanced Legal Research Engine not available"}
+        
+        # Get engine stats
+        engine = await get_research_engine()
+        engine_stats = await engine.get_engine_stats()
+        
+        # Get component stats
+        try:
+            matcher = await get_precedent_matcher()
+            precedent_stats = await matcher.get_system_stats()
+        except:
+            precedent_stats = {"status": "unavailable"}
+        
+        try:
+            scorer = await get_quality_scorer()
+            quality_stats = await scorer.get_system_stats()
+        except:
+            quality_stats = {"status": "unavailable"}
+        
+        # Get database stats
+        db_stats = {
+            "legal_research_queries": await db.legal_research_queries.count_documents({}),
+            "precedent_relationships": await db.precedent_relationships.count_documents({}),
+            "citation_network": await db.citation_network.count_documents({}),
+            "research_memos": await db.research_memos.count_documents({})
+        }
+        
+        return {
+            "status": "operational",
+            "engine_stats": engine_stats,
+            "precedent_matching_stats": precedent_stats,
+            "quality_assessment_stats": quality_stats,
+            "database_stats": db_stats,
+            "system_health": {
+                "advanced_research_engine": ADVANCED_RESEARCH_ENGINE_AVAILABLE,
+                "database_connected": True,
+                "timestamp": datetime.utcnow()
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ Error getting engine stats: {e}")
+        raise HTTPException(status_code=500, detail=f"Error getting stats: {str(e)}")
+
+@api_router.get("/legal-research-engine/research-queries")
+async def get_research_queries(limit: int = 50, skip: int = 0):
+    """Get recent legal research queries"""
+    try:
+        queries = await db.legal_research_queries.find().sort("created_at", -1).skip(skip).limit(limit).to_list(length=limit)
+        
+        # Convert ObjectId to string for JSON serialization
+        for query in queries:
+            query = convert_objectid_to_str(query)
+        
+        return {
+            "queries": queries,
+            "count": len(queries),
+            "total": await db.legal_research_queries.count_documents({})
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ Error fetching research queries: {e}")
+        raise HTTPException(status_code=500, detail=f"Error fetching queries: {str(e)}")
+
+@api_router.get("/legal-research-engine/research-memos")
+async def get_research_memos(limit: int = 50, skip: int = 0):
+    """Get recent research memos"""
+    try:
+        memos = await db.research_memos.find().sort("created_at", -1).skip(skip).limit(limit).to_list(length=limit)
+        
+        # Convert ObjectId to string for JSON serialization
+        for memo in memos:
+            memo = convert_objectid_to_str(memo)
+        
+        return {
+            "memos": memos,
+            "count": len(memos),
+            "total": await db.research_memos.count_documents({})
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ Error fetching research memos: {e}")
+        raise HTTPException(status_code=500, detail=f"Error fetching memos: {str(e)}")
+
+@api_router.delete("/legal-research-engine/research-query/{query_id}")
+async def delete_research_query(query_id: str):
+    """Delete a research query and its associated data"""
+    try:
+        # Delete from legal_research_queries
+        result = await db.legal_research_queries.delete_one({"id": query_id})
+        
+        if result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="Research query not found")
+        
+        # Also delete associated memos
+        await db.research_memos.delete_many({"research_query": query_id})
+        
+        return {"message": "Research query deleted successfully", "query_id": query_id}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Error deleting research query: {e}")
+        raise HTTPException(status_code=500, detail=f"Error deleting query: {str(e)}")
+
+
+# ================================
 # BUSINESS INTELLIGENCE & ANALYTICS MODELS
 # ================================
 
