@@ -5,30 +5,33 @@ Advanced Legal Research Engine API Endpoints Testing
 
 Comprehensive testing of the Advanced Legal Research Engine API endpoints to verify:
 
-1. **PRIMARY ISSUE FIX**: MemoFormat validation error resolved (changed "professional" to "traditional")
-2. **COMPLETE PHASE 1A VERIFICATION**: All 7 core modules operational:
-   - advanced_legal_research_engine.py - Main orchestration engine  
-   - precedent_matching_system.py - AI-powered precedent analysis
-   - citation_network_analyzer.py - Citation relationship mapping
-   - research_memo_generator.py - Automated legal memo generation
-   - legal_argument_structurer.py - AI-powered argument construction
-   - multi_jurisdiction_search.py - Cross-jurisdictional research
-   - research_quality_scorer.py - AI-powered quality assessment
+**PRIMARY FOCUS - Test These 2 Previously Failing Endpoints:**
 
-3. **ENDPOINT TESTING PRIORITY**:
-   - POST /api/legal-research-engine/research (Main orchestration endpoint)
-   - GET /api/legal-research-engine/stats (System health check)
-   - POST /api/legal-research-engine/precedent-search
-   - POST /api/legal-research-engine/citation-analysis  
-   - GET /api/legal-research-engine/research-queries
-   - GET /api/legal-research-engine/research-memos
+1. **POST /api/legal-research-engine/research** (Main Research Endpoint)
+   - Test with research_type: "precedent_search", "memo_generation", "comprehensive" 
+   - Verify enum serialization works without errors
+   - Check that ResearchType enum values are properly handled
+   - Confirm response structure matches ResearchResultResponse
 
-4. **SUCCESS CRITERIA**:
-   - All 8 endpoints should return proper responses (target: 100% success rate)
-   - No MemoFormat validation errors
-   - All 7 modules should be operational
-   - Database collections should be properly utilized
-   - AI integration (Gemini/Groq) should be working
+2. **POST /api/legal-research-engine/generate-memo** (Memo Generation)
+   - Test memo generation with sample memo_data
+   - Verify 'id' field is present in response (not memo_id)
+   - Confirm field mapping works correctly
+   - Check response matches ResearchMemoResponse structure
+
+**SECONDARY VERIFICATION - Test Previously Working Endpoints:**
+
+3. **GET /api/legal-research-engine/stats** - System health check
+4. **GET /api/legal-research-engine/research-queries** - Research queries list  
+5. **POST /api/legal-research-engine/precedent-search** - Precedent matching
+6. **POST /api/legal-research-engine/citation-analysis** - Citation network analysis
+
+**EXPECTED OUTCOMES:**
+- Success rate should improve from 83.3% (5/6) to 100% (6/6)
+- No enum serialization errors in main research endpoint
+- No 'id' field errors in memo generation endpoint
+- All 7 Phase 1A modules should remain operational
+- Comprehensive testing of complex research scenarios
 """
 
 import requests
