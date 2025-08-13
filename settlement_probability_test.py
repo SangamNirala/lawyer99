@@ -22,7 +22,7 @@ from datetime import datetime, timedelta
 from typing import Dict, Any, List
 
 # Backend URL from environment
-BACKEND_URL = "https://legalengine.preview.emergentagent.com/api"
+BACKEND_URL = "https://legalcore.preview.emergentagent.com/api"
 
 def test_settlement_probability_basic():
     """Test basic settlement probability calculation with standard case"""

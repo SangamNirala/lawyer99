@@ -7,7 +7,7 @@ import requests
 import json
 import sys
 
-BACKEND_URL = "https://legalengine.preview.emergentagent.com/api"
+BACKEND_URL = "https://legalcore.preview.emergentagent.com/api"
 
 def test_simple_litigation_strategy():
     """Test with minimal data to debug the issue"""
