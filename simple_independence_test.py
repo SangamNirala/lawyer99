@@ -7,7 +7,7 @@ import requests
 import json
 
 # Backend URL from environment
-BACKEND_URL = "https://legalmate-research.preview.emergentagent.com/api"
+BACKEND_URL = "https://legal-research-api.preview.emergentagent.com/api"
 
 def test_independence():
     """Test with very different user input to see if AI is independent"""

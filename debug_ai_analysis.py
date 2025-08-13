@@ -8,7 +8,7 @@ import json
 import sys
 
 # Backend URL from environment
-BACKEND_URL = "https://legalmate-research.preview.emergentagent.com/api"
+BACKEND_URL = "https://legal-research-api.preview.emergentagent.com/api"
 
 def debug_ai_analysis():
     """Debug the AI analysis response"""

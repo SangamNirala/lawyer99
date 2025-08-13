@@ -13,7 +13,7 @@ import sys
 from datetime import datetime
 
 # Backend URL from environment
-BACKEND_URL = "https://legalmate-research.preview.emergentagent.com/api"
+BACKEND_URL = "https://legal-research-api.preview.emergentagent.com/api"
 
 def test_stats_endpoint():
     """Quick test of stats endpoint"""
