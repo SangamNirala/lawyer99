@@ -397,6 +397,183 @@ class PlainEnglishResult(BaseModel):
     legal_warnings: List[str] = Field(default_factory=list)
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
+# Advanced Legal Research Engine Models
+class ResearchQueryRequest(BaseModel):
+    query_text: str
+    research_type: str = "comprehensive"  # precedent_search, citation_analysis, memo_generation, argument_building, jurisdiction_comparison, comprehensive
+    jurisdiction: str = "US"
+    legal_domain: str = "general"
+    priority: str = "medium"  # low, medium, high, critical
+    court_level: Optional[str] = None
+    date_range: Optional[Dict[str, str]] = None
+    case_type: Optional[str] = None
+    legal_issues: List[str] = Field(default_factory=list)
+    max_results: int = 50
+    min_confidence: float = 0.7
+    include_analysis: bool = True
+    cache_results: bool = True
+    user_context: Dict[str, Any] = Field(default_factory=dict)
+
+class PrecedentSearchRequest(BaseModel):
+    query_case: Dict[str, Any]
+    filters: Dict[str, Any] = Field(default_factory=dict)
+    max_results: int = 20
+    min_similarity: float = 0.6
+
+class CitationAnalysisRequest(BaseModel):
+    cases: List[Dict[str, Any]]
+    depth: int = 2
+    jurisdiction_filter: Optional[str] = None
+
+class MemoGenerationRequest(BaseModel):
+    memo_data: Dict[str, Any]
+    memo_type: str = "comprehensive"  # brief, comprehensive, summary
+    format_style: str = "professional"
+
+class LegalArgumentRequest(BaseModel):
+    argument_data: Dict[str, Any]
+    argument_strength: str = "strong"
+    include_counterarguments: bool = True
+
+class MultiJurisdictionRequest(BaseModel):
+    query: str
+    jurisdictions: List[str] = Field(default_factory=lambda: ["US", "UK", "CA", "AU"])
+    legal_domain: str = "general"
+    comparison_mode: bool = True
+
+class QualityAssessmentRequest(BaseModel):
+    research_data: Dict[str, Any]
+
+# Response Models
+class SimilarityScoreResponse(BaseModel):
+    factual_similarity: float
+    legal_similarity: float
+    procedural_similarity: float
+    jurisdictional_similarity: float
+    temporal_similarity: float
+    overall_similarity: float
+    confidence_score: float
+
+class LegalPrincipleResponse(BaseModel):
+    id: str
+    principle_text: str
+    legal_domain: str
+    authority_level: str
+    jurisdiction: str
+    source_case: str
+    confidence_score: float
+    supporting_citations: List[str]
+    created_at: datetime
+
+class PrecedentMatchResponse(BaseModel):
+    case_id: str
+    case_title: str
+    citation: str
+    court: str
+    jurisdiction: str
+    decision_date: Optional[datetime]
+    case_summary: str
+    legal_issues: List[str]
+    holdings: List[str]
+    key_facts: List[str]
+    similarity_scores: SimilarityScoreResponse
+    match_type: str
+    relevance_score: float
+    extracted_principles: List[LegalPrincipleResponse]
+    citation_count: int
+    authority_score: float
+    match_reasoning: str
+    distinguishing_factors: List[str]
+    supporting_quotes: List[str]
+    created_at: datetime
+
+class CitationNetworkResponse(BaseModel):
+    network_id: str
+    total_nodes: int
+    total_edges: int
+    network_density: float
+    average_path_length: float
+    clustering_coefficient: float
+    landmark_cases: List[str]
+    authority_ranking: List[Dict[str, Any]]
+    legal_evolution_chains: List[List[str]]
+    overruling_relationships: List[Dict[str, Any]]
+    jurisdiction_scope: List[str]
+    analysis_timestamp: datetime
+
+class ResearchMemoResponse(BaseModel):
+    id: str
+    research_query: str
+    memo_type: str
+    generated_memo: str
+    memo_structure: Dict[str, str]
+    supporting_cases: List[Dict[str, Any]]
+    legal_authorities: List[Dict[str, Any]]
+    confidence_rating: float
+    ai_quality_score: float
+    completeness_score: float
+    auto_validation_status: str
+    word_count: int
+    reading_time_estimate: int
+    export_formats: List[str]
+    created_at: datetime
+
+class LegalArgumentResponse(BaseModel):
+    id: str
+    legal_question: str
+    argument_structure: Dict[str, Any]
+    supporting_precedents: List[Dict[str, Any]]
+    counterarguments: List[Dict[str, Any]]
+    argument_strength_score: float
+    persuasiveness_rating: float
+    confidence_score: float
+    jurisdiction: str
+    case_type: str
+    created_at: datetime
+
+class QualityAssessmentResponse(BaseModel):
+    assessment_id: str
+    overall_scores: Dict[str, Any]
+    dimensional_scores: Dict[str, Any]
+    source_analysis: Dict[str, Any]
+    quality_insights: Dict[str, Any]
+    gap_analysis: Dict[str, Any]
+    enhancement_opportunities: List[Dict[str, Any]]
+    source_authorities: List[Dict[str, Any]]
+    metadata: Dict[str, Any]
+
+class ResearchResultResponse(BaseModel):
+    id: str
+    query_id: str
+    research_type: str
+    results: List[Dict[str, Any]]
+    precedent_matches: List[PrecedentMatchResponse]
+    citation_network: Dict[str, Any]
+    generated_memo: Optional[str]
+    legal_arguments: List[Dict[str, Any]]
+    confidence_score: float
+    completeness_score: float
+    authority_score: float
+    processing_time: float
+    models_used: List[str]
+    sources_count: int
+    status: str
+    created_at: datetime
+    updated_at: datetime
+    expires_at: Optional[datetime]
+
+class ResearchStatusResponse(BaseModel):
+    research_id: str
+    status: str
+    progress: Optional[float] = None
+    estimated_completion: Optional[datetime] = None
+    current_operation: Optional[str] = None
+    results_count: Optional[int] = None
+    completed_at: Optional[datetime] = None
+    confidence_score: Optional[float] = None
+    cached_at: Optional[datetime] = None
+    message: Optional[str] = None
+
 # New models for Smart Contract Analysis
 class ContractAnalysisRequest(BaseModel):
     contract_content: str
