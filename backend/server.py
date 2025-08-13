@@ -5494,9 +5494,16 @@ async def coordinate_legal_research(request: ResearchQueryRequest):
         # Execute comprehensive research
         result = await engine.coordinate_research(research_query)
         
-        # Store research session in database
+        # Store research session in database - convert enums to strings for serialization
         research_doc = asdict(result)
         research_doc["_id"] = result.id
+        # Convert enum values to strings for MongoDB compatibility
+        if hasattr(result.research_type, 'value'):
+            research_doc["research_type"] = result.research_type.value
+        if hasattr(result.priority, 'value'):
+            research_doc["priority"] = result.priority.value
+        if hasattr(result.status, 'value'):
+            research_doc["status"] = result.status.value
         await db.legal_research_queries.insert_one(research_doc)
         
         logger.info(f"✅ Research completed: {result.sources_count} sources, confidence: {result.confidence_score:.2f}")
