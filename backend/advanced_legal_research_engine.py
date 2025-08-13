@@ -431,7 +431,7 @@ class AdvancedLegalResearchEngine:
             generated_memo = await self.memo_generator.generate_research_memo(
                 memo_data=memo_data,
                 memo_type="comprehensive",
-                format_style="professional"
+                format_style="traditional"
             )
             
             result.generated_memo = generated_memo.get("content", "")
