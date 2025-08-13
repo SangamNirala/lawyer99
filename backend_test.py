@@ -1,21 +1,34 @@
 #!/usr/bin/env python3
 """
-Settlement Probability Calculator Validation Fix Testing
-=======================================================
+Advanced Legal Research Engine API Endpoints Testing
+===================================================
 
-Comprehensive testing of the Settlement Probability Calculator endpoints to verify
-the Pydantic validation fix is working correctly:
+Comprehensive testing of the Advanced Legal Research Engine API endpoints to verify:
 
-1. POST /api/litigation/settlement-probability (basic settlement analysis)
-2. POST /api/litigation/settlement-probability-advanced (advanced settlement analysis)
+1. **PRIMARY ISSUE FIX**: MemoFormat validation error resolved (changed "professional" to "traditional")
+2. **COMPLETE PHASE 1A VERIFICATION**: All 7 core modules operational:
+   - advanced_legal_research_engine.py - Main orchestration engine  
+   - precedent_matching_system.py - AI-powered precedent analysis
+   - citation_network_analyzer.py - Citation relationship mapping
+   - research_memo_generator.py - Automated legal memo generation
+   - legal_argument_structurer.py - AI-powered argument construction
+   - multi_jurisdiction_search.py - Cross-jurisdictional research
+   - research_quality_scorer.py - AI-powered quality assessment
 
-SPECIFIC TEST SCENARIOS:
-- Test with sample case data to trigger the negotiation_leverage calculation
-- Verify that both endpoints accept the complex negotiation_leverage structure
-- Confirm the response includes proper NegotiationLeverageData structure without validation errors
+3. **ENDPOINT TESTING PRIORITY**:
+   - POST /api/legal-research-engine/research (Main orchestration endpoint)
+   - GET /api/legal-research-engine/stats (System health check)
+   - POST /api/legal-research-engine/precedent-search
+   - POST /api/legal-research-engine/citation-analysis  
+   - GET /api/legal-research-engine/research-queries
+   - GET /api/legal-research-engine/research-memos
 
-This addresses the user's exact issue where clicking settlement calculation buttons
-was causing validation errors.
+4. **SUCCESS CRITERIA**:
+   - All 8 endpoints should return proper responses (target: 100% success rate)
+   - No MemoFormat validation errors
+   - All 7 modules should be operational
+   - Database collections should be properly utilized
+   - AI integration (Gemini/Groq) should be working
 """
 
 import requests
