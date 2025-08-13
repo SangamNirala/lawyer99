@@ -96,3 +96,10 @@ tokenizers>=0.15.0
 
 markupsafe>=2.1.0
 regex>=2023.0.0
+edge-tts>=6.1.0
+deep-translator>=1.11.0
+google-search-results>=2.4.0
+newspaper3k>=0.2.8
+textstat>=0.7.0
+lxml[html_clean]>=4.9.0
+networkx>=3.0
