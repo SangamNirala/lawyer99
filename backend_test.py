@@ -41,8 +41,8 @@ import time
 from datetime import datetime
 from typing import Dict, Any, List
 
-# Backend URL from environment
-BACKEND_URL = "https://legal-research-api.preview.emergentagent.com/api"
+# Backend URL from environment - using local URL since external is not responding
+BACKEND_URL = "http://localhost:8001/api"
 
 def test_main_research_endpoint():
     """Test the main research endpoint with different research types - CRITICAL FIX VERIFICATION"""
