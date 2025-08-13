@@ -132,8 +132,8 @@ class JurisdictionalSearchResult:
 @dataclass
 class JurisdictionComparison:
     """Comparison between jurisdictions"""
-    comparison_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     primary_jurisdiction: str
+    comparison_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     comparison_jurisdictions: List[str] = field(default_factory=list)
     
     # Comparison results
