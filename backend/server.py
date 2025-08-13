@@ -5495,15 +5495,23 @@ async def coordinate_legal_research(request: ResearchQueryRequest):
         result = await engine.coordinate_research(research_query)
         
         # Store research session in database - convert enums to strings for serialization
-        research_doc = asdict(result)
+        def serialize_enums(obj):
+            """Recursively convert enum objects to strings for MongoDB serialization"""
+            if isinstance(obj, dict):
+                return {key: serialize_enums(value) for key, value in obj.items()}
+            elif isinstance(obj, list):
+                return [serialize_enums(item) for item in obj]
+            elif hasattr(obj, '__dict__') and hasattr(obj, 'value'):
+                # This is an enum, return its value
+                return obj.value
+            elif hasattr(obj, '__dict__'):
+                # This is a dataclass or similar object, convert to dict and recurse
+                return serialize_enums(asdict(obj))
+            else:
+                return obj
+        
+        research_doc = serialize_enums(asdict(result))
         research_doc["_id"] = result.id
-        # Convert enum values to strings for MongoDB compatibility
-        if hasattr(result.research_type, 'value'):
-            research_doc["research_type"] = result.research_type.value
-        if hasattr(result.priority, 'value'):
-            research_doc["priority"] = result.priority.value
-        if hasattr(result.status, 'value'):
-            research_doc["status"] = result.status.value
         await db.legal_research_queries.insert_one(research_doc)
         
         logger.info(f"✅ Research completed: {result.sources_count} sources, confidence: {result.confidence_score:.2f}")
