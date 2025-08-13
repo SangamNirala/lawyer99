@@ -97,8 +97,8 @@ class JurisdictionProfile:
 @dataclass
 class JurisdictionalSearchResult:
     """Result from a jurisdictional search"""
-    result_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     jurisdiction: Jurisdiction
+    result_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     
     # Case/Authority information
     title: str = ""
